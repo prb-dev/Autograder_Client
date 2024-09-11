@@ -9,14 +9,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
-import { TypographyH2 } from "./ui/TypographyH2";
-import { Input } from "./ui/input";
+} from "../components/ui/form";
+import { Textarea } from "../components/ui/textarea";
+import { Button } from "../components/ui/button";
+import { TypographyH2 } from "../components/ui/TypographyH2";
+import { Input } from "../components/ui/input";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import Rubric from "./Rubric";
+import Rubric from "../components/Rubric";
 import clsx from "clsx";
 
 const formSchema = z
@@ -55,7 +55,7 @@ const CreateQuestion = () => {
       formData.append("question", values.question);
       formData.append("image", values.diagram);
 
-      const res = await fetch("http://127.0.0.1:8000/questions", {
+      const res = await fetch("http://127.0.0.1:8000/questions/create", {
         method: "POST",
         body: formData,
       });

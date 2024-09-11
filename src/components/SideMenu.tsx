@@ -30,7 +30,7 @@ const SideMenu = () => {
             span: <span>Create</span>,
           },
           {
-            link: "/create/q",
+            link: "/view/q",
             icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
             span: <span>View</span>,
           },
