@@ -19,7 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "./ui/checkbox";
-import { json } from "stream/consumers";
 
 type Rubric = {
   criterias: string[];
