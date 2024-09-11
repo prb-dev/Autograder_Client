@@ -37,6 +37,7 @@ const formSchema = z
 const CreateQuestion = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [qid, setQid] = useState("");
+  const [diagramType, setDiagramType] = useState("");
   const [rubric, setRubric] = useState(undefined);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,6 +64,7 @@ const CreateQuestion = () => {
 
       setQid(data.qid);
       setRubric(data.rubric);
+      setDiagramType(data.diagram_type);
     } catch (error) {
       console.log(error);
     } finally {
@@ -134,7 +136,7 @@ const CreateQuestion = () => {
           !rubric && "hidden"
         )}
       >
-        <Rubric qid={qid} rubric={rubric} />
+        <Rubric qid={qid} rubric={rubric} diagramType={diagramType} />
       </div>
     </>
   );
