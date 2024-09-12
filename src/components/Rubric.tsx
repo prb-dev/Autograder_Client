@@ -191,8 +191,8 @@ const Rubric = ({
   };
 
   return (
-    <div className="flex flex-col">
-      <TypographyH2 className="self-center">Customize the Rubric</TypographyH2>
+    <div className="w-full h-full flex flex-col pb-5">
+      <TypographyH2>Customize the Rubric</TypographyH2>
 
       <div className="flex justify-between">
         <div className="mt-5">
@@ -205,7 +205,7 @@ const Rubric = ({
         </div>
       </div>
 
-      <Tabs defaultValue={rubric?.criterias[0]} className="mt-10">
+      <Tabs defaultValue={rubric?.criterias[0]} className="mt-8">
         <TypographyH4 className="capitalize mb-2">
           Criterias
           <Button variant="ghost">
@@ -254,7 +254,7 @@ const Rubric = ({
           </Button>
         </TypographyH4>
 
-        <TabsList className="min-w-[510px]">
+        <TabsList className="w-full">
           {tempCriterias &&
             Object.keys(tempCriterias).map(
               (criteria, i) =>
@@ -342,7 +342,7 @@ const Rubric = ({
 
       <Button
         type="submit"
-        className="w-full mt-8"
+        className="w-fit mt-8 mb-5"
         disabled={isLoading}
         onClick={handleSubmit}
       >

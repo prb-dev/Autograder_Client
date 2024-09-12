@@ -14,15 +14,36 @@ import { Textarea } from "../components/ui/textarea";
 import { Button } from "../components/ui/button";
 import { TypographyH2 } from "../components/ui/TypographyH2";
 import { Input } from "../components/ui/input";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, EyeOpenIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import Rubric from "../components/Rubric";
 import clsx from "clsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z
   .object({
     question: z.string(),
     diagram: z.instanceof(File),
+    deadline: z.date({
+      required_error: "A deadline is required.",
+    }),
   })
   .refine(
     (data) => {
@@ -39,6 +60,7 @@ const CreateQuestion = () => {
   const [qid, setQid] = useState("");
   const [diagramType, setDiagramType] = useState("");
   const [rubric, setRubric] = useState(undefined);
+  const [selectedImage, setSelectedImage] = useState<File | undefined>();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +76,7 @@ const CreateQuestion = () => {
       const formData = new FormData();
       formData.append("question", values.question);
       formData.append("image", values.diagram);
+      formData.append("deadline", values.deadline.toString());
 
       const res = await fetch("http://127.0.0.1:8000/questions/create", {
         method: "POST",
@@ -74,16 +97,17 @@ const CreateQuestion = () => {
   return (
     <>
       <div
-        className={clsx("flex justify-center items-center", rubric && "hidden")}
+        className={clsx(
+          "h-[100vh] overflow-y-scroll flex justify-start p-5",
+          rubric && "hidden"
+        )}
       >
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="w-96 flex flex-col gap-8"
+            className="w-full flex flex-col gap-8"
           >
-            <TypographyH2 className="self-center">
-              Create the Question
-            </TypographyH2>
+            <TypographyH2>Create the Question</TypographyH2>
 
             <FormField
               control={form.control}
@@ -105,12 +129,40 @@ const CreateQuestion = () => {
               name="diagram"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Diagram Image</FormLabel>
+                  <FormLabel className="flex gap-2">
+                    Diagram Image
+                    {selectedImage && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" className="w-4 h-4 p-0">
+                            <EyeOpenIcon className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] max-w-[90%] max-h-[90%] p-0 overflow-hidden bg-transparent border-none">
+                          <DialogHeader className="hidden">
+                            <DialogTitle>Image</DialogTitle>
+                            <DialogDescription>
+                              Selected image.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div>
+                            <img
+                              src={URL.createObjectURL(selectedImage)}
+                              alt={selectedImage.name}
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => field.onChange(e.target.files?.[0])} // Capture the selected file
+                      onChange={(e) => {
+                        setSelectedImage(e.target.files?.[0]);
+                        field.onChange(e.target.files?.[0]);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>
@@ -121,7 +173,54 @@ const CreateQuestion = () => {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <FormField
+              control={form.control}
+              name="deadline"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Deadline</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[240px] pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>
+                    Select the date for the deadline.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              className="w-fit self-start"
+              disabled={isLoading}
+            >
               {isLoading && (
                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
               )}
@@ -132,7 +231,7 @@ const CreateQuestion = () => {
       </div>
       <div
         className={clsx(
-          "flex justify-center items-center",
+          "h-[100vh] overflow-y-scroll flex p-5",
           !rubric && "hidden"
         )}
       >
