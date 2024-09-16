@@ -41,7 +41,6 @@ import {
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 
 export type Question = {
-  id: string;
   _id: string;
   answer_count: number;
   status: "pending" | "processing" | "success" | "failed";
@@ -117,8 +116,6 @@ export const columns: ColumnDef<Question>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original;
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -130,7 +127,7 @@ export const columns: ColumnDef<Question>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText("")}
             >
               Copy payment ID
             </DropdownMenuItem>
@@ -182,10 +179,6 @@ const ViewQuestions = () => {
 
     fetchData();
   }, []);
-
-  React.useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   return (
     <div className="w-full p-5">

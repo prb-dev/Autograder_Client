@@ -35,15 +35,16 @@ type TempCriterias = {
 
 const Rubric = ({
   question,
+  toggler,
 }: {
   question: {
-    qid: string;
     question: string;
     image: File | null;
     deadline: string;
     diagramType: string;
     rubric: RubricType;
   };
+  toggler: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(0);
@@ -156,7 +157,7 @@ const Rubric = ({
       }
     });
 
-    const payload = {
+    const rubric = {
       criterias: Object.entries(updatedMarks).map(([criteria, marksArray]) => ({
         name: criteria,
         marks_ranges: ranges?.map((range, i) => ({
@@ -168,18 +169,22 @@ const Rubric = ({
       total,
     };
 
+    const payload = {
+      question: question.question,
+      diagram_type: question.diagramType,
+      deadline: question.deadline,
+      rubric,
+    };
+
     try {
       setIsLoading(true);
-      const res = await fetch(
-        `http://127.0.0.1:8000/questions/rubrics/${question.qid}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`http://127.0.0.1:8000/questions/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json();
 
@@ -341,15 +346,28 @@ const Rubric = ({
           )}
       </Tabs>
 
-      <Button
-        type="submit"
-        className="w-fit mt-8 mb-5"
-        disabled={isLoading}
-        onClick={handleSubmit}
-      >
-        {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
-        Submit
-      </Button>
+      <div className="space-x-5 self-end">
+        <Button
+          type="button"
+          className="w-fit mt-8 mb-5"
+          variant="secondary"
+          onClick={() => {
+            toggler(false);
+          }}
+        >
+          Back
+        </Button>
+
+        <Button
+          type="submit"
+          className="w-fit mt-8 mb-5"
+          disabled={isLoading}
+          onClick={handleSubmit}
+        >
+          {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+          Submit
+        </Button>
+      </div>
     </div>
   );
 };

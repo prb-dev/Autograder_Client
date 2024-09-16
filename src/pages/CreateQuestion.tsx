@@ -34,7 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RubricType } from "@/types/RubricType";
+import { QuestionType } from "@/types/QuestionType";
 
 const formSchema = z
   .object({
@@ -56,15 +56,8 @@ const formSchema = z
 
 const CreateQuestion = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [question, setQuestion] = useState<{
-    qid: string;
-    question: string;
-    image: File | null;
-    deadline: string;
-    diagramType: string;
-    rubric: RubricType;
-  }>({
-    qid: "",
+  const [created, setCreated] = useState(false);
+  const [question, setQuestion] = useState<QuestionType>({
     question: "",
     image: null,
     deadline: "",
@@ -88,9 +81,7 @@ const CreateQuestion = () => {
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append("question", values.question);
       formData.append("image", values.diagram);
-      formData.append("deadline", values.deadline.toString());
 
       const res = await fetch("http://127.0.0.1:8000/questions/create", {
         method: "POST",
@@ -101,22 +92,27 @@ const CreateQuestion = () => {
 
       setQuestion((prev) => ({
         ...prev,
-        qid: data.qid,
+        question: values.question,
+        deadline: values.deadline.toString(),
+        image: values.diagram,
         rubric: data.rubric,
         diagramType: data.diagram_type,
       }));
+
+      setCreated(true);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <>
       <div
         className={clsx(
           "h-[100vh] overflow-y-scroll flex justify-start p-5",
-          question.rubric.criterias.length > 0 && "hidden"
+          created && "hidden"
         )}
       >
         <Form {...form}>
@@ -235,13 +231,13 @@ const CreateQuestion = () => {
 
             <Button
               type="submit"
-              className="w-fit self-start"
+              className="w-fit self-end"
               disabled={isLoading}
             >
               {isLoading && (
                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Submit
+              Next
             </Button>
           </form>
         </Form>
@@ -249,10 +245,10 @@ const CreateQuestion = () => {
       <div
         className={clsx(
           "h-[100vh] overflow-y-scroll flex p-5",
-          question.rubric.criterias.length < 0 && "hidden"
+          !created && "hidden"
         )}
       >
-        <Rubric question={question} />
+        <Rubric question={question} toggler={setCreated} />
       </div>
     </>
   );
