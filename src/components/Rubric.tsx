@@ -19,11 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "./ui/checkbox";
-
-type Rubric = {
-  criterias: string[];
-  ranges: [number, number][];
-};
+import { RubricType } from "@/types/RubricType";
 
 type Mark = {
   [criteria: string]: number[];
@@ -38,13 +34,16 @@ type TempCriterias = {
 };
 
 const Rubric = ({
-  qid,
-  rubric,
-  diagramType,
+  question,
 }: {
-  qid: string;
-  rubric?: Rubric;
-  diagramType: string;
+  question: {
+    qid: string;
+    question: string;
+    image: File | null;
+    deadline: string;
+    diagramType: string;
+    rubric: RubricType;
+  };
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(0);
@@ -59,22 +58,22 @@ const Rubric = ({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setRanges(rubric?.ranges);
+    setRanges(question.rubric?.ranges);
 
     setTempCriterias(
-      rubric?.criterias.reduce((acc, criteria) => {
+      question.rubric?.criterias.reduce((acc, criteria) => {
         acc[criteria] = true;
         return acc;
       }, {} as TempCriterias)
     );
 
-    rubric?.criterias.forEach((criteria) => {
+    question.rubric?.criterias.forEach((criteria) => {
       setMarks((prevMarks) => ({
         ...prevMarks,
-        [criteria]: Array(rubric?.ranges.length).fill(0),
+        [criteria]: Array(question.rubric?.ranges.length).fill(0),
       }));
     });
-  }, [rubric]);
+  }, [question.rubric]);
 
   useEffect(() => {
     const newSubTotals: SubTotals = {};
@@ -151,7 +150,7 @@ const Rubric = ({
   const handleSubmit = async () => {
     const updatedMarks = { ...marks };
 
-    rubric?.criterias.forEach((critera) => {
+    question.rubric?.criterias.forEach((critera) => {
       if (tempCriterias && !tempCriterias[critera]) {
         delete updatedMarks[critera];
       }
@@ -164,13 +163,15 @@ const Rubric = ({
           range,
           marks: marksArray[i],
         })),
+        sub_total: subTotals[criteria],
       })),
+      total,
     };
 
     try {
       setIsLoading(true);
       const res = await fetch(
-        `http://127.0.0.1:8000/questions/rubrics/${qid}`,
+        `http://127.0.0.1:8000/questions/rubrics/${question.qid}`,
         {
           method: "POST",
           headers: {
@@ -197,7 +198,7 @@ const Rubric = ({
       <div className="flex justify-between">
         <div className="mt-5">
           <TypographyH4 className="capitalize">Diagram type</TypographyH4>
-          <TypographyInlineCode>{diagramType}</TypographyInlineCode>
+          <TypographyInlineCode>{question.diagramType}</TypographyInlineCode>
         </div>
         <div className="mt-5">
           <TypographyH4 className="capitalize">Total marks</TypographyH4>
@@ -205,7 +206,7 @@ const Rubric = ({
         </div>
       </div>
 
-      <Tabs defaultValue={rubric?.criterias[0]} className="mt-8">
+      <Tabs defaultValue={question.rubric?.criterias[0]} className="mt-8">
         <TypographyH4 className="capitalize mb-2">
           Criterias
           <Button variant="ghost">
@@ -227,7 +228,7 @@ const Rubric = ({
                 </DialogHeader>
 
                 <div className="mt-3 space-y-5">
-                  {rubric?.criterias.map((criteria, i) => (
+                  {question.rubric?.criterias.map((criteria, i) => (
                     <div key={i} className="flex items-center space-x-2">
                       <Checkbox
                         id={criteria}

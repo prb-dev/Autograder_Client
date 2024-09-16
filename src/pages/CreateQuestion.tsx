@@ -30,12 +30,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { RubricType } from "@/types/RubricType";
 
 const formSchema = z
   .object({
@@ -57,9 +56,24 @@ const formSchema = z
 
 const CreateQuestion = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [qid, setQid] = useState("");
-  const [diagramType, setDiagramType] = useState("");
-  const [rubric, setRubric] = useState(undefined);
+  const [question, setQuestion] = useState<{
+    qid: string;
+    question: string;
+    image: File | null;
+    deadline: string;
+    diagramType: string;
+    rubric: RubricType;
+  }>({
+    qid: "",
+    question: "",
+    image: null,
+    deadline: "",
+    diagramType: "",
+    rubric: {
+      criterias: [],
+      ranges: [],
+    },
+  });
   const [selectedImage, setSelectedImage] = useState<File | undefined>();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -85,9 +99,12 @@ const CreateQuestion = () => {
 
       const data = await res.json();
 
-      setQid(data.qid);
-      setRubric(data.rubric);
-      setDiagramType(data.diagram_type);
+      setQuestion((prev) => ({
+        ...prev,
+        qid: data.qid,
+        rubric: data.rubric,
+        diagramType: data.diagram_type,
+      }));
     } catch (error) {
       console.log(error);
     } finally {
@@ -99,7 +116,7 @@ const CreateQuestion = () => {
       <div
         className={clsx(
           "h-[100vh] overflow-y-scroll flex justify-start p-5",
-          rubric && "hidden"
+          question.rubric.criterias.length > 0 && "hidden"
         )}
       >
         <Form {...form}>
@@ -232,10 +249,10 @@ const CreateQuestion = () => {
       <div
         className={clsx(
           "h-[100vh] overflow-y-scroll flex p-5",
-          !rubric && "hidden"
+          question.rubric.criterias.length < 0 && "hidden"
         )}
       >
-        <Rubric qid={qid} rubric={rubric} diagramType={diagramType} />
+        <Rubric question={question} />
       </div>
     </>
   );
