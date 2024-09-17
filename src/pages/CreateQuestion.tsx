@@ -74,6 +74,7 @@ const CreateQuestion = () => {
     defaultValues: {
       question: "",
       diagram: undefined,
+      deadline: undefined,
     },
   });
 

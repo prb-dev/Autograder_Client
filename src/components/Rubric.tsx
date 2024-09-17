@@ -19,7 +19,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "./ui/checkbox";
-import { RubricType } from "@/types/RubricType";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../firebase";
+import { QuestionType } from "@/types/QuestionType";
+import { useToast } from "@/hooks/use-toast";
 
 type Mark = {
   [criteria: string]: number[];
@@ -37,15 +40,10 @@ const Rubric = ({
   question,
   toggler,
 }: {
-  question: {
-    question: string;
-    image: File | null;
-    deadline: string;
-    diagramType: string;
-    rubric: RubricType;
-  };
+  question: QuestionType;
   toggler: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [subTotals, setSubTotals] = useState<SubTotals>({});
@@ -148,6 +146,43 @@ const Rubric = ({
     });
   };
 
+  const uploadImage = async (qid: string, diagramType: string) => {
+    const imageRef = ref(storage, `${qid}/correct_answer/${qid}`);
+
+    try {
+      if (question.image) {
+        const snapshot = await uploadBytes(imageRef, question.image);
+        const imageUrl = await getDownloadURL(snapshot.ref);
+
+        const res = await fetch(
+          `http://127.0.0.1:8000/questions/${qid}/add/image`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: imageUrl,
+              diagram_type: diagramType,
+            }),
+          }
+        );
+
+        const data = await res.json();
+
+        toast({
+          title: "Success",
+          description: data.message,
+        });
+
+        toggler(false);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+    }
+  };
+
   const handleSubmit = async () => {
     const updatedMarks = { ...marks };
 
@@ -188,7 +223,7 @@ const Rubric = ({
 
       const data = await res.json();
 
-      console.log(data);
+      await uploadImage(data.qid, payload.diagram_type);
     } catch (error) {
       console.log(error);
     } finally {
