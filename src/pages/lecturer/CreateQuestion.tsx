@@ -9,14 +9,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
-import { Textarea } from "../components/ui/textarea";
-import { Button } from "../components/ui/button";
-import { TypographyH2 } from "../components/ui/TypographyH2";
-import { Input } from "../components/ui/input";
+} from "../../components/ui/form";
+import { Textarea } from "../../components/ui/textarea";
+import { Button } from "../../components/ui/button";
+import { TypographyH2 } from "../../components/ui/TypographyH2";
+import { Input } from "../../components/ui/input";
 import { CalendarIcon, EyeOpenIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import Rubric from "../components/Rubric";
+import Rubric from "../../components/lecturer/Rubric";
 import clsx from "clsx";
 import {
   Popover,

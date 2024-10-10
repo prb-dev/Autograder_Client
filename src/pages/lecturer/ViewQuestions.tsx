@@ -93,7 +93,9 @@ export const columns: ColumnDef<Question>[] = [
   {
     accessorKey: "answer_count",
     header: () => <div>Answers</div>,
-    cell: ({ row }) => <div className="font-mono">{row.getValue("answer_count")}</div>,
+    cell: ({ row }) => (
+      <div className="font-mono">{row.getValue("answer_count")}</div>
+    ),
   },
   {
     accessorKey: "created_at",
@@ -126,9 +128,7 @@ export const columns: ColumnDef<Question>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText("")}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText("")}>
               Copy payment ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -172,9 +172,13 @@ const ViewQuestions = () => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("http://127.0.0.1:8000/questions");
-      const values = await res.json();
-      setData(values.questions);
+      try {
+        const res = await fetch("http://127.0.0.1:8000/questions");
+        const values = await res.json();
+        setData(values.questions);
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     fetchData();

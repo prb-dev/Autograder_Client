@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "./ui/input";
-import { TypographyH2 } from "./ui/TypographyH2";
-import { Separator } from "./ui/separator";
-import { TypographyP } from "./ui/TypographyP";
+import { Input } from "../ui/input";
+import { TypographyH2 } from "../ui/TypographyH2";
+import { Separator } from "../ui/separator";
+import { TypographyP } from "../ui/TypographyP";
 import { useEffect, useState } from "react";
-import { TypographyH4 } from "./ui/TypographyH4";
-import { TypographyInlineCode } from "./ui/TypographyInlineCode";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Button } from "./ui/button";
+import { TypographyH4 } from "../ui/TypographyH4";
+import { TypographyInlineCode } from "../ui/TypographyInlineCode";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { Button } from "../ui/button";
 import { Pencil1Icon, ReloadIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
@@ -18,9 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Checkbox } from "./ui/checkbox";
+import { Checkbox } from "../ui/checkbox";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "../firebase";
+import { storage } from "../../firebase";
 import { QuestionType } from "@/types/QuestionType";
 import { useToast } from "@/hooks/use-toast";
 
@@ -386,6 +386,7 @@ const Rubric = ({
           type="button"
           className="w-fit mt-8 mb-5"
           variant="secondary"
+          disabled={isLoading}
           onClick={() => {
             toggler(false);
           }}
