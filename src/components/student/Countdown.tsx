@@ -12,18 +12,22 @@ const Countdown = ({ date }: { date: string }) => {
     const difference = target.getTime() - now.getTime();
 
     const d = Math.floor(difference / (1000 * 60 * 60 * 24));
-    setDays(d);
+    if (d < 0) setDays(0);
+    else setDays(d);
 
     const h = Math.floor(
       (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
     );
-    setHours(h);
+    if (h < 0) setHours(0);
+    else setHours(h);
 
     const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-    setMinutes(m);
+    if (m < 0) setMinutes(0);
+    else setMinutes(m);
 
     const s = Math.floor((difference % (1000 * 60)) / 1000);
-    setSeconds(s);
+    if (s < 0) setSeconds(0);
+    else setSeconds(s);
   }, 1000);
 
   return (

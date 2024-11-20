@@ -47,7 +47,7 @@ const SideMenu = () => {
         heading: "Answers",
         items: [
           {
-            link: "/create/q",
+            link: "/view/a",
             icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
             span: (
               <span>

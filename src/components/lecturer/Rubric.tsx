@@ -147,7 +147,10 @@ const Rubric = ({
   };
 
   const uploadImage = async (qid: string, diagramType: string) => {
-    const imageRef = ref(storage, `${qid}/correct_answer/${qid}`);
+    const imageRef = ref(
+      storage,
+      `${qid}/correct_answer/${qid}.${question.image?.type.split("/").pop()}`
+    );
 
     try {
       if (question.image) {

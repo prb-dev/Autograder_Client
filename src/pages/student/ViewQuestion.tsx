@@ -71,7 +71,10 @@ const ViewQuestion = () => {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const qid = "66e8e84cdd16f4ca22cd3c26";
     const uid = "66e8e84cdd16f4ca22cd3c26";
-    const imageRef = ref(storage, `${qid}/student_answers/${uid}`);
+    const imageRef = ref(
+      storage,
+      `${qid}/student_answers/${uid}.${values.diagram?.type.split("/").pop()}`
+    );
 
     try {
       setIsLoading(true);
