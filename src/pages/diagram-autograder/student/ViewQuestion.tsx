@@ -1,4 +1,4 @@
-import Countdown from "@/components/student/Countdown";
+import Countdown from "@/components/diagram-autograder/student/Countdown";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

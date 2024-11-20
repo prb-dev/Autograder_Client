@@ -1,11 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./pages/lecturer/Home";
-import SideMenu from "./components/lecturer/SideMenu";
-import CreateQuestion from "./pages/lecturer/CreateQuestion";
-import ViewQuestions from "./pages/lecturer/ViewQuestions";
+import Home from "./pages/diagram-autograder/lecturer/Home";
+import SideMenu from "./components/diagram-autograder/lecturer/SideMenu";
+import CreateQuestion from "./pages/diagram-autograder/lecturer/CreateQuestion";
+import ViewQuestions from "./pages/diagram-autograder/lecturer/ViewQuestions";
 import { Toaster } from "./components/ui/toaster";
-import ViewQuestion from "./pages/student/ViewQuestion";
-import ViewAnswers from "./pages/lecturer/ViewAnswers";
+import ViewQuestion from "./pages/diagram-autograder/student/ViewQuestion";
+import ViewAnswers from "./pages/diagram-autograder/lecturer/ViewAnswers";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@radix-ui/react-label";
 import { useState } from "react";
