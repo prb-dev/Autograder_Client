@@ -9,41 +9,52 @@ import ViewAnswers from "./pages/lecturer/ViewAnswers";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@radix-ui/react-label";
 import { useState } from "react";
+import { Header } from "./components/ui/Header";
 
 function App() {
   const [lecturer, setLecturer] = useState(true);
+  const [autograder, setAutograder] = useState("d");
 
   return (
     <BrowserRouter>
-      <div className="flex justify-end items-center gap-2 p-5">
-        <Switch
-          id="user-type"
-          checked={lecturer}
-          onClick={() => setLecturer(!lecturer)}
-        />
-        <Label htmlFor="user-type"> Lecturer </Label>
-      </div>
-      <main className="flex">
-        <SideMenu />
-        <div className="flex-1">
-          <Routes>
-            {lecturer ? (
-              <>
-                <Route path="/" element={<Home />} />
-                <Route path="/create/q" element={<CreateQuestion />} />
-                <Route path="/view/q" element={<ViewQuestions />} />
-                <Route path="/view/a" element={<ViewAnswers />} />
-              </>
-            ) : (
-              <>
-                <Route path="/" element={<Home />} />
-                <Route path="/view/q" element={<ViewQuestion />} />
-              </>
-            )}
-          </Routes>
+      <div className="flex justify-end items-center p-5">
+        <Header toggler={setAutograder} />
+        <div className="flex gap-2 items-center scale-90">
+          <Switch
+            id="user-type"
+            checked={lecturer}
+            onClick={() => setLecturer(!lecturer)}
+          />
+          <Label htmlFor="user-type"> Lecturer </Label>
         </div>
-      </main>
-      <Toaster />
+      </div>
+      {autograder == "d" ? (
+        <>
+          <main className="flex">
+            <SideMenu />
+            <div className="flex-1">
+              <Routes>
+                {lecturer ? (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/create/q" element={<CreateQuestion />} />
+                    <Route path="/view/q" element={<ViewQuestions />} />
+                    <Route path="/view/a" element={<ViewAnswers />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/view/q" element={<ViewQuestion />} />
+                  </>
+                )}
+              </Routes>
+            </div>
+          </main>
+          <Toaster />
+        </>
+      ) : (
+        <></>
+      )}
     </BrowserRouter>
   );
 }
