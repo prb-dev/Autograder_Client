@@ -84,7 +84,7 @@ const SideMenu = () => {
 
   return (
     <div className="h-[100vh]">
-      <Command className="rounded-lg border shadow-md md:min-w-[300px]">
+      <Command className="rounded-lg border shadow-md md:min-w-[300px] pt-5">
         <CommandInput placeholder="Type a command or search..." />
         <CommandList className="max-h-full">
           <CommandEmpty>No results found.</CommandEmpty>

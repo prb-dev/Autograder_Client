@@ -17,22 +17,22 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex justify-end items-center p-5">
-        <Header toggler={setAutograder} />
-        <div className="flex gap-2 items-center scale-90">
-          <Switch
-            id="user-type"
-            checked={lecturer}
-            onClick={() => setLecturer(!lecturer)}
-          />
-          <Label htmlFor="user-type"> Lecturer </Label>
-        </div>
-      </div>
       {autograder == "d" ? (
         <>
           <main className="flex">
             <SideMenu />
             <div className="flex-1">
+              <div className="flex justify-end items-center p-5">
+                <Header toggler={setAutograder} />
+                <div className="flex gap-2 items-center scale-90">
+                  <Switch
+                    id="user-type"
+                    checked={lecturer}
+                    onClick={() => setLecturer(!lecturer)}
+                  />
+                  <Label htmlFor="user-type"> Lecturer </Label>
+                </div>
+              </div>
               <Routes>
                 {lecturer ? (
                   <>
@@ -53,7 +53,19 @@ function App() {
           <Toaster />
         </>
       ) : (
-        <></>
+        <>
+          <div className="flex justify-end items-center p-5">
+            <Header toggler={setAutograder} />
+            <div className="flex gap-2 items-center scale-90">
+              <Switch
+                id="user-type"
+                checked={lecturer}
+                onClick={() => setLecturer(!lecturer)}
+              />
+              <Label htmlFor="user-type"> Lecturer </Label>
+            </div>
+          </div>
+        </>
       )}
     </BrowserRouter>
   );
