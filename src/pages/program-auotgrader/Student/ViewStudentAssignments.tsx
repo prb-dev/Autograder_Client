@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const ViewStudentAssignments = () => {
   const [assignments, setAssignments] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -39,6 +41,10 @@ const ViewStudentAssignments = () => {
     fetchAssignments();
   }, []);
 
+  const handleViewAssignment = (assignmentId) => {
+    navigate(`/stu/assignment/${assignmentId}`);
+  };
+
   return (
     <div className="w-full p-5">
       <TypographyH2>View Assignments</TypographyH2>
@@ -64,7 +70,11 @@ const ViewStudentAssignments = () => {
               </p>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="mt-4">
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => handleViewAssignment(assignment._id)}
+              >
                 View Details
               </Button>
             </CardFooter>

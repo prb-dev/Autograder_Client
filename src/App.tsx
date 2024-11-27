@@ -15,6 +15,7 @@ import CreateProgrammingQ from "./pages/program-auotgrader/lecturer/CreateProgra
 import ViewProAssignments from "./pages/program-auotgrader/lecturer/ViewProAssignments";
 import SideMenuStu from "./components/programming-autograder/student/SideMenuStu";
 import ViewStudentAssignments from "./pages/program-auotgrader/Student/ViewStudentAssignments";
+import ViewSingleAssignment from "./pages/program-auotgrader/Student/ViewSingleAssignment";
 
 function App() {
   const [lecturer, setLecturer] = useState(true);
@@ -94,6 +95,10 @@ function App() {
                     <Route
                       path="/findAssignment"
                       element={<ViewStudentAssignments />}
+                    />
+                    <Route
+                      path="stu/assignment/:assignmentId"
+                      element={<ViewSingleAssignment />}
                     />
                   </>
                 )}
