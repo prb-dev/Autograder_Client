@@ -16,6 +16,8 @@ import ViewProAssignments from "./pages/program-auotgrader/lecturer/ViewProAssig
 import SideMenuStu from "./components/programming-autograder/student/SideMenuStu";
 import ViewStudentAssignments from "./pages/program-auotgrader/Student/ViewStudentAssignments";
 import ViewSingleAssignment from "./pages/program-auotgrader/Student/ViewSingleAssignment";
+import ViewSubmissions from "./pages/program-auotgrader/lecturer/ViewSubmissions";
+import ViewSubmissionDetails from "./pages/program-auotgrader/lecturer/ViewSubmissionDetails";
 
 function App() {
   const [lecturer, setLecturer] = useState(true);
@@ -87,7 +89,15 @@ function App() {
                       path="/pro/View/q"
                       element={<ViewProAssignments />}
                     />
-                    <Route path="/view/a" element={<ViewAnswers />} />
+                    <Route
+                      path="/submissions/:assignmentId"
+                      element={<ViewSubmissions />}
+                    />
+                    <Route
+                      path="/submissions/details/:submissionId"
+                      element={<ViewSubmissionDetails />}
+                    />
+                    {/* <Route path="/view/a" element={<ViewAnswers />} /> */}
                   </>
                 ) : (
                   <>

@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import {
   CaretSortIcon,
   ChevronDownIcon,
@@ -17,6 +16,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -144,6 +144,8 @@ export const columns: ColumnDef<Assignment>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
+      const navigate = useNavigate(); // Adding navigation hook
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -160,7 +162,14 @@ export const columns: ColumnDef<Assignment>[] = [
               Copy Assignment ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Assignment</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                const assignmentId = row.getValue("_id");
+                navigate(`/submissions/${assignmentId}`);
+              }}
+            >
+              View Submissions
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
