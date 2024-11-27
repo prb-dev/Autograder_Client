@@ -7,7 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+
 const ViewSingleAssignment = () => {
+  const { toast } = useToast();
+
   const { assignmentId } = useParams();
   const [assignment, setAssignment] = useState(null);
   const { register, handleSubmit, reset } = useForm();
@@ -17,11 +21,12 @@ const ViewSingleAssignment = () => {
     const fetchAssignment = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/api/assignments/${assignmentId}`
+          `http://localhost:5001/api/assignments/singleForStudent/${assignmentId}`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch assignment");
         }
+
         const values = await res.json();
         setAssignment(values.data);
       } catch (error) {
@@ -61,6 +66,13 @@ const ViewSingleAssignment = () => {
 
       const response = await res.json();
       console.log("Submission successful:", response);
+
+      // Show success toast here
+      toast({
+        title: "Success!",
+        description: "Answer submitted successfully.",
+      });
+
       reset();
     } catch (error) {
       console.error(error);
