@@ -39,6 +39,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
+import { Link } from "react-router-dom";
 
 export type Question = {
   _id: string;
@@ -128,12 +129,16 @@ export const columns: ColumnDef<Question>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText("")}>
-              Copy payment ID
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(row.getValue("_id"))}
+            >
+              Copy question ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <Link to={`/view/${row.getValue("_id")}/a`}>
+              <DropdownMenuItem>View answers </DropdownMenuItem>
+            </Link>
+            <DropdownMenuItem>View question details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

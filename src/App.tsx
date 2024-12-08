@@ -21,7 +21,7 @@ function App() {
         <>
           <main className="flex">
             <SideMenu />
-            <div className="flex-1">
+            <div className="h-[100vh] flex-1">
               <div className="flex justify-end items-center p-5">
                 <Header toggler={setAutograder} />
                 <div className="flex gap-2 items-center scale-90">
@@ -39,7 +39,10 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/create/q" element={<CreateQuestion />} />
                     <Route path="/view/q" element={<ViewQuestions />} />
-                    <Route path="/view/a" element={<ViewAnswers />} />
+                    <Route
+                      path="/view/:qid?/a/:aid?"
+                      element={<ViewAnswers />}
+                    />
                   </>
                 ) : (
                   <>

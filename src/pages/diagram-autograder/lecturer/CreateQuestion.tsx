@@ -112,7 +112,7 @@ const CreateQuestion = () => {
     <>
       <div
         className={clsx(
-          "h-[100vh] overflow-y-scroll flex justify-start p-5",
+          "overflow-y-scroll flex justify-start p-5",
           created && "hidden"
         )}
       >

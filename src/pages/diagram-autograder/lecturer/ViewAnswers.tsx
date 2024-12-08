@@ -50,6 +50,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Link, Params, useNavigate, useParams } from "react-router-dom";
+import { TypographyP } from "@/components/ui/TypographyP";
+import { TypographyH4 } from "@/components/ui/TypographyH4";
+import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
+import { Separator } from "@/components/ui/separator";
 
 export type Answer = {
   id: string;
@@ -60,6 +65,8 @@ export type Answer = {
 };
 
 const ViewAnswers = () => {
+  const params = useParams();
+  const navigate = useNavigate();
   const [qids, setQids] = useState([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -69,7 +76,6 @@ const ViewAnswers = () => {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [data, setData] = useState<Answer[]>([]);
-  const [selectedQid, setSelectedQid] = useState<string>();
   const [open, setOpen] = useState(false);
 
   const columns: ColumnDef<Answer>[] = [
@@ -196,13 +202,17 @@ const ViewAnswers = () => {
           </Button>
         );
       },
-      cell: ({ row }) => <div>{row.getValue("created_at")}</div>,
+      cell: ({ row }) => (
+        <div className="font-medium font-mono">
+          {row.getValue("created_at")}
+        </div>
+      ),
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original;
+        const answer = row.original;
 
         return (
           <DropdownMenu>
@@ -215,13 +225,14 @@ const ViewAnswers = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
+                onClick={() => navigator.clipboard.writeText(answer.id)}
               >
-                Copy payment ID
+                Copy answer ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
+              <Link to={`${answer.id}`}>
+                <DropdownMenuItem>View answer details</DropdownMenuItem>
+              </Link>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -266,14 +277,15 @@ const ViewAnswers = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedQid) {
+    if (!params.qid) {
+      navigate("/view/a");
       setData([]);
       return;
     }
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/answers/${selectedQid}`);
+        const res = await fetch(`http://127.0.0.1:8000/answers/${params.qid}`);
         const data = await res.json();
 
         const answers = data.answers.map((item: any) => ({
@@ -291,130 +303,233 @@ const ViewAnswers = () => {
     };
 
     fetchData();
-  }, [selectedQid]);
+  }, [params.qid]);
 
   return (
-    <div className="h-[100vh] overflow-y-scroll p-5 space-y-4">
-      <TypographyH2>View Answers</TypographyH2>
-      <Combobox
-        title="Select Question..."
-        placeholder="Search Question..."
-        emptyMessage="No question found."
-        values={qids}
-        handleChange={setSelectedQid}
-      />
+    <div className="overflow-y-scroll p-5 space-y-4">
+      {params.aid ? (
+        <div>
+          <TypographyH2>Answers Details</TypographyH2>
 
-      <div className="w-full">
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter IDs..."
-            value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("id")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
+          <AnswerDetails params={params} />
+        </div>
+      ) : (
+        <div>
+          <TypographyH2>View Answers</TypographyH2>
+
+          <Combobox
+            title="Select Question..."
+            placeholder="Search Question..."
+            emptyMessage="No question found."
+            values={qids}
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
+
+          <div className="w-full">
+            <div className="flex items-center py-4">
+              <Input
+                placeholder="Filter IDs..."
+                value={
+                  (table.getColumn("id")?.getFilterValue() as string) ?? ""
+                }
+                onChange={(event) =>
+                  table.getColumn("id")?.setFilterValue(event.target.value)
+                }
+                className="max-w-sm"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => {
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) =>
+                            column.toggleVisibility(!!value)
+                          }
+                        >
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={header.id}>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
                             )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center"
+                      >
+                        No results.
                       </TableCell>
-                    ))}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <div className="flex-1 text-sm text-muted-foreground">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
+  const [answer, setAnswer] = useState<Answer>();
+
+  useEffect(() => {
+    const fetchAnswer = async () => {
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/answers/${params.qid}/${params.aid}`
+        );
+        const data = await res.json();
+
+        const answer = {
+          id: data.answer._id,
+          uid: data.answer.user_id,
+          marks: data.answer.marks,
+          diagram: data.answer.answer.image,
+          created_at: data.answer.created_at,
+        };
+
+        setAnswer(answer);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAnswer();
+  }, [params.aid]);
+
+  return (
+    <div>
+      <div className="flex justify-between mb-10">
+        <div className="mt-5">
+          <TypographyH4 className="capitalize">Student ID</TypographyH4>
+          <TypographyInlineCode>{answer?.uid}</TypographyInlineCode>
+        </div>
+        <div className="mt-5">
+          <TypographyH4 className="capitalize">Uploaded at</TypographyH4>
+          <TypographyInlineCode>{answer?.created_at}</TypographyInlineCode>
+        </div>
+        <div className="mt-5">
+          <TypographyH4 className="capitalize">Total marks</TypographyH4>
+          <TypographyInlineCode>{answer?.marks.total}</TypographyInlineCode>
+        </div>
+      </div>
+      <div className="flex flex-col justify-center items-center py-4 gap-4">
+        <div>
+          <img className="object-cover" src={answer?.diagram} alt="" />
+        </div>
+
+        <TypographyP className="self-start">
+          Marks for each criterion of the students' diagram.
+        </TypographyP>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Criterion</TableHead>
+              <TableHead>Correctness</TableHead>
+              <TableHead className="text-right">Sub Total</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {answer?.marks &&
+              Object.entries(answer.marks)
+                .filter(([key]) => key !== "total")
+                .map(([key, value]: [string, any]) => (
+                  <TableRow key={key}>
+                    <TableCell>{key}</TableCell>
+                    <TableCell className="font-mono">
+                      {value.correctness}%
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {value.mark}
+                    </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+                ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={2}>Total</TableCell>
+              <TableCell className="text-right font-mono font-semibold">
+                {answer?.marks.total}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
       </div>
     </div>
   );

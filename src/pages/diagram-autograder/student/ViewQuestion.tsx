@@ -55,7 +55,7 @@ const ViewQuestion = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/questions/66e8e84cdd16f4ca22cd3c26"
+          "http://127.0.0.1:8000/questions/67514a7b102f2807c2a490e5"
         );
         const data = await res.json();
         setQuestion(data.question.question);
@@ -69,7 +69,7 @@ const ViewQuestion = () => {
   }, []);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const qid = "66e8e84cdd16f4ca22cd3c26";
+    const qid = "67514a7b102f2807c2a490e5";
     const uid = "66e8e84cdd16f4ca22cd3c26";
     const imageRef = ref(
       storage,
