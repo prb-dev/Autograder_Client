@@ -14,6 +14,16 @@ import { Header } from "./components/ui/Header";
 // 1) Import your new side menus:
 import SideMenuTechnicalLecturer from "./components/technical/lecturer/SideMenuTechnicalLecturer";
 import SideMenuTechnicalStudent from "./components/technical/student/SideMenuTechnicalStudent";
+import CreateTechnicalQuestion from "./pages/technical/lecturer/CreateTechnicalQuestion";
+import ViewTechnicalExams from "./pages/technical/lecturer/ViewTechnicalExams";
+import ViewTechnicalExamDetails from "./pages/technical/lecturer/ViewTechnicalExamDetails";
+import LaunchTechnicalExams from "./pages/technical/lecturer/LaunchTechnicalExams";
+import ViewTechnicalAnswers from "./pages/technical/lecturer/ViewTechnicalAnswers";
+import ViewTechnicalAnswerDetails from "./pages/technical/lecturer/ViewTechnicalAnswerDetails";
+import FindTechnicalAssignments from "./pages/technical/student/FindTechnicalAssignments";
+import StartTechnicalExam from "./pages/technical/student/StartTechnicalExam";
+import StudentMarksList from "./pages/technical/student/StudentMarksList";
+import ViewStudentExamMarks from "./pages/technical/student/ViewStudentExamMarks";
 
 function App() {
   const [lecturer, setLecturer] = useState(true);
@@ -87,22 +97,20 @@ function App() {
                 {lecturer ? (
                   <>
                     <Route path="/" element={<Home />} />
-                    <Route path="/create/t" element={<div>Create Tech Q</div>} />
-                    <Route path="/view/t" element={<div>View Tech Q</div>} />
-                    <Route path="/launch/t" element={<div>Launch Tech Q</div>} />
-                    <Route
-                      path="/view-answers/t"
-                      element={<div>View Answers Tech</div>}
-                    />
+                    <Route path="/create/t" element={<CreateTechnicalQuestion />} />
+                    <Route path="/view/t" element={<ViewTechnicalExams />} />
+                    <Route path="/launch/t" element={<LaunchTechnicalExams />} />
+                    <Route path="/view/t/:examId" element={<ViewTechnicalExamDetails />} />
+                    <Route path="/view-answers/t/" element={<ViewTechnicalAnswers />} />
+                    <Route path="/view-answers/t/:subId" element={<ViewTechnicalAnswerDetails />} />
                   </>
                 ) : (
                   <>
                     <Route path="/" element={<Home />} />
-                    <Route
-                      path="/find-assignment/t"
-                      element={<div>Find Assignment</div>}
-                    />
-                    <Route path="/marks/t" element={<div>My Marks</div>} />
+                    <Route path="/find-assignment/t" element={<FindTechnicalAssignments />} />
+                    <Route path="/find-assignment/t/:examId" element={<StartTechnicalExam />} />
+                    <Route path="/marks/t" element={<StudentMarksList />} />
+                    <Route path="/marks/t/:subId" element={<ViewStudentExamMarks />} />
                   </>
                 )}
               </Routes>
