@@ -19,6 +19,7 @@ const ViewSubmissionDetails = () => {
         }
         const values = await res.json();
         setSubmission(values.data);
+        console.log(values.data);
       } catch (error) {
         console.error(error);
         setSubmission(null);
@@ -43,6 +44,10 @@ const ViewSubmissionDetails = () => {
               </p>
               <p className="text-sm text-gray-700 mb-2">
                 <strong>Total Marks:</strong> {submission.total_score}
+              </p>
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Code Similarity:</strong>{" "}
+                {submission.code_similarity_percentage}
               </p>
               <p className="text-sm text-gray-700 mb-2">
                 <strong>Submitted Code:</strong>
