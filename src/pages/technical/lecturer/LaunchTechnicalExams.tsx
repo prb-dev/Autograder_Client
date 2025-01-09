@@ -3,66 +3,74 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 
-/** Example shape includes "status" so we can track launched/disabled */
 type Exam = {
   _id: string;
   moduleName: string;
   moduleCode: string;
   year: string;
   semester: string;
-  status: "draft" | "launched" | "disabled";
+  // must match the model now that it has "status"
+  status?: "draft" | "launched" | "disabled";
 };
 
 export default function LaunchTechnicalExams() {
   const [exams, setExams] = useState<Exam[]>([]);
 
-  // 1) Fetch all exams on mount (replace with your real endpoint)
+  // 1) fetch all exams
   useEffect(() => {
     async function fetchExams() {
-      // Example mock data. Replace with fetch(...) to your API
-      const mockData: Exam[] = [
-        {
-          _id: "111",
-          moduleName: "Software Engineering",
-          moduleCode: "SE302",
-          year: "3",
-          semester: "1",
-          status: "draft",
-        },
-        {
-          _id: "222",
-          moduleName: "Computer Networks",
-          moduleCode: "CN404",
-          year: "4",
-          semester: "2",
-          status: "launched",
-        },
-      ];
-      setExams(mockData);
+      try {
+        const res = await fetch("http://localhost:4000/api/exams");
+        if (!res.ok) throw new Error("Failed to fetch exams");
+        const data: Exam[] = await res.json();
+        setExams(data);
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+      }
     }
     fetchExams();
   }, []);
 
-  // 2) Launch exam
+  // 2) LAUNCH exam (POST /exams/:id/launch)
   async function handleLaunch(examId: string) {
-    // e.g. await fetch(`url/exams/launch/${examId}`, { method: 'POST' })
-    setExams((prev) =>
-      prev.map((ex) =>
-        ex._id === examId ? { ...ex, status: "launched" } : ex
-      )
-    );
-    alert(`Exam ${examId} launched (mock)`);
+    try {
+      const response = await fetch(`http://localhost:4000/api/exams/${examId}/launch`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to launch exam");
+      const updatedExam: Exam = await response.json();
+
+      // Update local state
+      setExams((prev) =>
+        prev.map((ex) => (ex._id === examId ? updatedExam : ex))
+      );
+
+      alert(`Exam ${examId} launched successfully!`);
+    } catch (error) {
+      console.error("Error launching exam:", error);
+      alert("Error launching exam. Check console.");
+    }
   }
 
-  // 3) Disable exam
+  // 3) DISABLE exam (POST /exams/:id/disable)
   async function handleDisable(examId: string) {
-    // e.g. await fetch(`url/exams/disable/${examId}`, { method: 'POST' })
-    setExams((prev) =>
-      prev.map((ex) =>
-        ex._id === examId ? { ...ex, status: "disabled" } : ex
-      )
-    );
-    alert(`Exam ${examId} disabled (mock)`);
+    try {
+      const response = await fetch(`http://localhost:4000/api/exams/${examId}/disable`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to disable exam");
+      const updatedExam: Exam = await response.json();
+
+      // Update local state
+      setExams((prev) =>
+        prev.map((ex) => (ex._id === examId ? updatedExam : ex))
+      );
+
+      alert(`Exam ${examId} disabled successfully!`);
+    } catch (error) {
+      console.error("Error disabling exam:", error);
+      alert("Error disabling exam. Check console.");
+    }
   }
 
   return (
@@ -85,12 +93,14 @@ export default function LaunchTechnicalExams() {
                 <p>
                   Year: {exam.year} | Semester: {exam.semester}
                 </p>
-                <p>Status: {exam.status}</p>
+                <p>Status: {exam.status ?? "unknown"}</p>
               </div>
 
               <div className="flex gap-2">
                 {exam.status !== "launched" && (
-                  <Button onClick={() => handleLaunch(exam._id)}>Launch</Button>
+                  <Button onClick={() => handleLaunch(exam._id)}>
+                    Launch
+                  </Button>
                 )}
                 {exam.status !== "disabled" && (
                   <Button

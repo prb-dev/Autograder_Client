@@ -1,47 +1,35 @@
+// src/pages/technical/student/FindTechnicalAssignments.tsx
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 import { useNavigate } from "react-router-dom";
 
-/** Example shape for an exam to display in the list */
 type TechnicalExam = {
-  _id: string; // exam ID
+  _id: string;
   moduleName: string;
   moduleCode: string;
   year: string;
   semester: string;
-  status: "launched" | "draft" | "disabled";
+  status?: "draft" | "launched" | "disabled";
 };
 
 export default function FindTechnicalAssignments() {
   const [exams, setExams] = useState<TechnicalExam[]>([]);
   const navigate = useNavigate();
 
-  // 1) Fetch launched exams on mount
+  // 1) fetch all, then filter "launched"
   useEffect(() => {
     async function fetchExams() {
-      // Example mock data. Replace with your actual fetch call:
-      // const res = await fetch("http://yourapi.com/exams/technical?launched=true")
-      // const data = await res.json()
-      const mockData: TechnicalExam[] = [
-        {
-          _id: "exam111",
-          moduleName: "Software Engineering",
-          moduleCode: "SE302",
-          year: "3",
-          semester: "1",
-          status: "launched",
-        },
-        {
-          _id: "exam222",
-          moduleName: "Computer Networks",
-          moduleCode: "CN404",
-          year: "4",
-          semester: "2",
-          status: "launched",
-        },
-      ];
-      setExams(mockData);
+      try {
+        const res = await fetch("http://localhost:4000/api/exams");
+        if (!res.ok) throw new Error("Failed to fetch exams");
+        const allExams: TechnicalExam[] = await res.json();
+        // filter only launched
+        const launchedExams = allExams.filter((ex) => ex.status === "launched");
+        setExams(launchedExams);
+      } catch (error) {
+        console.error("Error fetching launched exams:", error);
+      }
     }
     fetchExams();
   }, []);
@@ -66,7 +54,7 @@ export default function FindTechnicalAssignments() {
                 <p>
                   Year: {exam.year} | Semester: {exam.semester}
                 </p>
-                <p>Status: {exam.status}</p>
+                <p>Status: {exam.status ?? "unknown"}</p>
               </div>
 
               <Button
