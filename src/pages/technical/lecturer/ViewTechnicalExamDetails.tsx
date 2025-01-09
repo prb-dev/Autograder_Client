@@ -20,10 +20,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const questionSchema = z.object({
   question: z.string(),
   instructions: z.string().optional(),
+  // Accept either a string or a number
   marks: z
-    .string()
-    .regex(/^\d+$/, { message: "Must be a number" })
-    .transform(Number),
+    .union([z.string(), z.number()])
+    // Convert string to number if needed:
+    .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val))
+    // Double-check it's not NaN
+    .refine((val) => !isNaN(val), { message: "Must be a number" }),
   expected: z.string(),
 });
 
@@ -66,34 +69,14 @@ export default function ViewTechnicalExamDetails() {
   useEffect(() => {
     async function fetchExam() {
       try {
-        // Example mock data. Replace with fetch(...) to your real backend
-        // e.g. const res = await fetch(`http://example.com/api/exams/${examId}`)
-        // const data = await res.json()
-        const mockExam = {
-          _id: examId ?? "unknown",
-          moduleName: "Software Engineering",
-          moduleCode: "SE302",
-          year: "3",
-          semester: "1",
-          questions: [
-            {
-              question: "Explain the software development lifecycle?",
-              instructions: "Focus on Waterfall vs Agile differences.",
-              marks: 10,
-              expected: "Comparison, examples, at least 200 words",
-            },
-            {
-              question: "Describe UML diagrams used in design phase.",
-              instructions: "",
-              marks: 15,
-              expected: "Class, Sequence diagrams, etc.",
-            },
-          ],
-        };
-        // Set form values from fetched data
-        form.reset(mockExam);
+        const res = await fetch(`http://localhost:4000/api/exams/${examId}`);
+        if (!res.ok) throw new Error("Exam not found");
+        const exam = await res.json();
+
+        // exam will have _id, moduleName, moduleCode, year, semester, questions array, etc.
+        form.reset(exam); // Populate the form
       } catch (error) {
-        console.error("Failed to fetch exam: ", error);
+        console.error("Failed to fetch exam:", error);
       } finally {
         setLoading(false);
       }
@@ -104,16 +87,22 @@ export default function ViewTechnicalExamDetails() {
 
   // 5) Handle Save
   async function onSubmit(values: ExamFormType) {
-    console.log("Updated exam => ", values);
-    alert("Changes saved! Check console for updated exam data.");
-    // e.g. do fetch PUT to your server endpoint
-    // fetch(`http://example.com/api/exams/${values._id}`, {
-    //   method: "PUT",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(values),
-    // })
-    //   .then(...)
-    //   .catch(...)
+    console.log("Updated exam =>", values);
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/exams/${values._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
+      if (!response.ok) throw new Error("Failed to update exam");
+      alert("Exam updated successfully!");
+    } catch (error) {
+      console.error("Error updating exam:", error);
+      alert("Error updating exam. Check console for details.");
+    }
   }
 
   if (loading) {
@@ -135,7 +124,6 @@ export default function ViewTechnicalExamDetails() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-5">
-
           {/* Basic info (read-only or up to you) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <FormField
@@ -173,7 +161,16 @@ export default function ViewTechnicalExamDetails() {
                 <FormItem>
                   <FormLabel>Year</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <select
+                      // We'll use existing 'field' for onChange, value, etc.
+                      {...field}
+                      className="border rounded-md p-2 text-sm w-full"
+                    >
+                      <option value="1">Year 1</option>
+                      <option value="2">Year 2</option>
+                      <option value="3">Year 3</option>
+                      <option value="4">Year 4</option>
+                    </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,7 +184,13 @@ export default function ViewTechnicalExamDetails() {
                 <FormItem>
                   <FormLabel>Semester</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <select
+                      {...field}
+                      className="border rounded-md p-2 text-sm w-full"
+                    >
+                      <option value="1">Semester 1</option>
+                      <option value="2">Semester 2</option>
+                    </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -283,7 +286,14 @@ export default function ViewTechnicalExamDetails() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => append({ question: "", instructions: "", marks: 0, expected: "" })}
+              onClick={() =>
+                append({
+                  question: "",
+                  instructions: "",
+                  marks: 0,
+                  expected: "",
+                })
+              }
             >
               + Add Question
             </Button>

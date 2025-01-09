@@ -20,35 +20,40 @@ export default function ViewTechnicalExams() {
   // 1) Fetch all exams on mount (replace with real endpoint)
   useEffect(() => {
     async function fetchExams() {
-      // Example mock data. Replace with fetch(...) to your API
-      const mockData: Exam[] = [
-        {
-          _id: "111",
-          moduleName: "Software Engineering",
-          moduleCode: "SE302",
-          year: "3",
-          semester: "1",
-        },
-        {
-          _id: "222",
-          moduleName: "Computer Networks",
-          moduleCode: "CN404",
-          year: "4",
-          semester: "2",
-        },
-      ];
-      setExams(mockData);
+      try {
+        const res = await fetch("http://localhost:4000/api/exams");
+        if (!res.ok) throw new Error("Failed to fetch exams");
+        const data = await res.json();
+        setExams(data); // store in your local state
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+      }
     }
     fetchExams();
   }, []);
 
   // 2) Handle DELETE
+  // src/pages/technical/ViewTechnicalExams.tsx (excerpt)
   async function handleDelete(examId: string) {
-    // Example: 
-    // await fetch(`http://yourapi.com/exams/${examId}`, { method: 'DELETE' })
-    // Then remove from local state:
-    setExams((prev) => prev.filter((ex) => ex._id !== examId));
-    alert(`Exam ${examId} deleted (mock)`);
+    if (!confirm(`Are you sure you want to delete this exam?`)) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/exams/${examId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete exam");
+      }
+      // Remove from local state:
+      setExams((prev) => prev.filter((ex) => ex._id !== examId));
+      alert(`Exam ${examId} deleted successfully!`);
+    } catch (err) {
+      console.error("Error deleting exam:", err);
+      alert("Error deleting exam. Check console for details.");
+    }
   }
 
   return (

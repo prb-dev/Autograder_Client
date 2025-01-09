@@ -81,9 +81,36 @@ export default function CreateTechnicalQuestion() {
     5) Handle form submission
   */
   async function onSubmit(values: FormSchemaType) {
-    // Replace alert + console.log with your real submit logic
-    console.log("Form Values =>", values);
-    alert("Form submitted! Check console for values.");
+    try {
+      const response = await fetch("http://localhost:4000/api/exams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create exam");
+      }
+      const exam = await response.json();
+      form.reset({
+        moduleName: "",
+        moduleCode: "",
+        year: "1",
+        semester: "1",
+        questions: [
+          {
+            question: "",
+            instructions: "",
+            marks: 0,
+            expected: "",
+          },
+        ],
+      });
+      console.log("Exam created =>", exam);
+      alert("Exam created successfully!");
+    } catch (error) {
+      alert("Error creating exam. Check console for details.");
+      console.error(error);
+    }
   }
 
   return (
