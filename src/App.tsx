@@ -103,6 +103,7 @@ function App() {
                     <Route path="/view/t/:examId" element={<ViewTechnicalExamDetails />} />
                     <Route path="/view-answers/t/" element={<ViewTechnicalAnswers />} />
                     <Route path="/view-answers/t/:subId" element={<ViewTechnicalAnswerDetails />} />
+
                   </>
                 ) : (
                   <>

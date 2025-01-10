@@ -10,7 +10,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 type ExamQuestion = {
   question: string;
   instructions?: string;
-  allocated: number;
+  marks: number; // Note: Use 'marks' as defined in your backend model
 };
 
 /** 
@@ -41,37 +41,26 @@ export default function StartTechnicalExam() {
     },
   });
 
-  const { fields, replace } = useFieldArray({
+  const { fields } = useFieldArray({
     control: form.control,
     name: "questions",
   });
 
-  // 2) On mount, fetch the exam by ID
+  // 2) On mount, fetch the exam by ID from the backend
   useEffect(() => {
     async function fetchExam() {
       try {
-        // Example mock exam
-        // In real code, do:
-        // const res = await fetch(`http://yourapi.com/exams/${examId}`)
-        // const examData = await res.json()
-        const mockExam: ExamQuestion[] = [
-          {
-            question: "Explain the main components of OSI model?",
-            instructions: "Focus on layers 1-7 and their functions",
-            allocated: 10,
-          },
-          {
-            question: "What is DNS and how does it work?",
-            instructions: "Include real-world examples (like google.com).",
-            allocated: 10,
-          },
-        ];
+        const response = await fetch(`http://localhost:4000/api/exams/${examId}`);
+        if (!response.ok) {
+          throw new Error("Exam not found");
+        }
+        const examData = await response.json();
 
-        // Convert exam questions into "attempt" shape
-        const attemptData: AttemptQuestion[] = mockExam.map((q) => ({
+        // Map exam questions to the AttemptQuestion structure expected by the form
+        const attemptData: AttemptQuestion[] = examData.questions.map((q: ExamQuestion) => ({
           question: q.question,
           instructions: q.instructions,
-          allocated: q.allocated,
+          allocated: q.marks, // using "marks" from backend as allocated marks
           answer: "",
         }));
 
@@ -90,14 +79,24 @@ export default function StartTechnicalExam() {
 
   // 3) Handle "Submit" the student’s answers
   async function onSubmit(values: FormDataType) {
-    console.log("Student submission => ", values);
-    // e.g. POST to your server with the student's answers
-    // await fetch(`http://yourapi.com/submissions`, {
-    //   method: 'POST',
-    //   body: JSON.stringify(values)
-    // })
-    alert("Submitted successfully! Check console for data.");
-    navigate("/find-assignment/t"); // Or anywhere else you want after submission
+    try {
+      const response = await fetch("http://localhost:4000/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          examId: values.examId,
+          studentId: "student123",       // Replace with actual student ID as needed
+          studentName: "John Doe",       // Replace with actual student name as needed
+          questions: values.questions,
+        }),
+      });
+      if (!response.ok) throw new Error("Submission failed");
+      alert("Submitted successfully!");
+      navigate("/find-assignment/t");
+    } catch (error) {
+      console.error("Error submitting exam: ", error);
+      alert("Error submitting exam.");
+    }
   }
 
   if (loading) {
@@ -117,31 +116,28 @@ export default function StartTechnicalExam() {
       <TypographyH2 className="mt-4">Start Exam (#{examId})</TypographyH2>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-        {fields.map((fieldItem, idx) => {
-          const baseName = `questions.${idx}`;
-          return (
-            <div key={fieldItem.id} className="p-4 border rounded-md space-y-3">
-              <h3 className="font-semibold">
-                Question {idx + 1}: {fieldItem.question}
-              </h3>
-              {fieldItem.instructions && (
-                <p className="text-sm text-neutral-600">
-                  Instructions: {fieldItem.instructions}
-                </p>
-              )}
-              <p className="text-sm font-medium">
-                Allocated Marks: {fieldItem.allocated}
+        {fields.map((fieldItem, idx) => (
+          <div key={fieldItem.id} className="p-4 border rounded-md space-y-3">
+            <h3 className="font-semibold">
+              Question {idx + 1}: {fieldItem.question}
+            </h3>
+            {fieldItem.instructions && (
+              <p className="text-sm text-neutral-600">
+                Instructions: {fieldItem.instructions}
               </p>
+            )}
+            <p className="text-sm font-medium">
+              Allocated Marks: {fieldItem.allocated}
+            </p>
 
-              {/* Student's answer */}
-              <textarea
-                className="w-full border rounded-md p-2 mt-2"
-                rows={4}
-                {...form.register(`questions.${idx}.answer` as const)}
-              />
-            </div>
-          );
-        })}
+            {/* Student's answer */}
+            <textarea
+              className="w-full border rounded-md p-2 mt-2"
+              rows={4}
+              {...form.register(`questions.${idx}.answer` as const)}
+            />
+          </div>
+        ))}
 
         <Button type="submit" variant="default">
           Submit

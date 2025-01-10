@@ -1,16 +1,17 @@
+// src/pages/technical/student/ViewStudentExamMarks.tsx
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 
 /**
- * Each question’s marking info: 
- * - questionNumber: Q1, Q2, etc.
- * - studentMarks: the marks student obtained for that question
+ * Structure of a question's marks and feedback
  */
 type QuestionMarks = {
   questionNumber: number;
   studentMarks: number;
+  feedback: string;
 };
 
 /**
@@ -18,7 +19,7 @@ type QuestionMarks = {
  * - moduleName, moduleCode
  * - year, semester
  * - totalMarks
- * - array of questionNumber + studentMarks
+ * - array of questionNumber + studentMarks + feedback
  */
 type ExamMarksDetail = {
   submissionId: string;
@@ -31,47 +32,62 @@ type ExamMarksDetail = {
 };
 
 export default function ViewStudentExamMarks() {
-  const { subId } = useParams();
+  const { subId } = useParams<{ subId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [examDetail, setExamDetail] = useState<ExamMarksDetail | null>(null);
 
+  // Hardcoded studentId for now
+  const studentId = "student123";
+
   // Fetch the marks detail for the given submission ID
   useEffect(() => {
     async function fetchMarks() {
-      try {
-        // Example mock data. Replace with your real fetch call:
-        // const res = await fetch(`http://yourapi.com/submissions/${subId}`)
-        // const data = await res.json()
+      if (!subId) {
+        console.error("No submission ID provided.");
+        alert("Invalid submission ID.");
+        navigate("/marks/t");
+        return;
+      }
 
-        const mockDetail: ExamMarksDetail = {
-          submissionId: subId ?? "",
-          moduleName: "Software Engineering",
-          moduleCode: "SE302",
-          year: "3",
-          semester: "1",
-          totalMarks: 18,
-          questions: [
-            {
-              questionNumber: 1,
-              studentMarks: 8,
-            },
-            {
-              questionNumber: 2,
-              studentMarks: 10,
-            },
-          ],
+      try {
+        const response = await fetch(`http://localhost:4000/api/submissions/${subId}`);
+        if (!response.ok) throw new Error("Failed to fetch submission");
+        const data = await response.json();
+
+        // Verify that the submission belongs to the current student
+        if (data.studentId !== studentId) {
+          console.error("Submission does not belong to the current student.");
+          alert("You are not authorized to view this submission.");
+          navigate("/marks/t");
+          return;
+        }
+
+        // Transform the submission data to match ExamMarksDetail
+        const transformedData: ExamMarksDetail = {
+          submissionId: data._id,
+          moduleName: data.moduleName,
+          moduleCode: data.moduleCode,
+          year: data.year,
+          semester: data.semester,
+          totalMarks: data.totalMarks,
+          questions: data.answers.map((ans: any, index: number) => ({
+            questionNumber: index + 1,
+            studentMarks: ans.marks,
+            feedback: ans.feedback,
+          })),
         };
 
-        setExamDetail(mockDetail);
+        setExamDetail(transformedData);
       } catch (error) {
         console.error("Failed to fetch exam marks:", error);
+        alert("Failed to load exam marks. Please try again later.");
       } finally {
         setLoading(false);
       }
     }
     fetchMarks();
-  }, [subId]);
+  }, [subId, studentId, navigate]);
 
   if (loading) {
     return (
@@ -97,7 +113,7 @@ export default function ViewStudentExamMarks() {
         ← Back
       </Button>
 
-      <TypographyH2 className="mt-4">Exam Marks (#{subId})</TypographyH2>
+      <TypographyH2 className="mt-4">Exam Marks (#{examDetail.submissionId})</TypographyH2>
 
       {/* Show module info + year & semester */}
       <div className="mt-3 text-sm space-y-1">
@@ -110,13 +126,14 @@ export default function ViewStudentExamMarks() {
         <p>Total Marks: {totalMarks}</p>
       </div>
 
-      {/* Only Q No. and the student's marks */}
+      {/* Detailed Marks and Feedback */}
       <div className="overflow-auto mt-5">
         <table className="w-full border text-sm">
           <thead className="border-b bg-neutral-100">
             <tr>
               <th className="p-2 text-left w-16">Q No.</th>
               <th className="p-2 text-left w-20">Marks</th>
+              <th className="p-2 text-left">Feedback</th>
             </tr>
           </thead>
           <tbody>
@@ -124,6 +141,7 @@ export default function ViewStudentExamMarks() {
               <tr key={q.questionNumber} className="border-b">
                 <td className="p-2">{q.questionNumber}</td>
                 <td className="p-2">{q.studentMarks}</td>
+                <td className="p-2">{q.feedback || "No feedback provided."}</td>
               </tr>
             ))}
           </tbody>
