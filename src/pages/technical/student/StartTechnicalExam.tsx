@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 import { useForm, useFieldArray } from "react-hook-form";
 
-/** 
- * Each question might look like this 
+/**
+ * Each question might look like this
  */
 type ExamQuestion = {
   question: string;
@@ -13,8 +13,8 @@ type ExamQuestion = {
   marks: number; // Note: Use 'marks' as defined in your backend model
 };
 
-/** 
- * For the student's attempt, we store the "answer" for each question 
+/**
+ * For the student's attempt, we store the "answer" for each question
  */
 type AttemptQuestion = {
   question: string;
@@ -32,6 +32,7 @@ export default function StartTechnicalExam() {
   const { examId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // 1) set up react-hook-form
   const form = useForm<FormDataType>({
@@ -50,19 +51,23 @@ export default function StartTechnicalExam() {
   useEffect(() => {
     async function fetchExam() {
       try {
-        const response = await fetch(`http://localhost:4000/api/exams/${examId}`);
+        const response = await fetch(
+          `http://localhost:4000/api/exams/${examId}`
+        );
         if (!response.ok) {
           throw new Error("Exam not found");
         }
         const examData = await response.json();
 
         // Map exam questions to the AttemptQuestion structure expected by the form
-        const attemptData: AttemptQuestion[] = examData.questions.map((q: ExamQuestion) => ({
-          question: q.question,
-          instructions: q.instructions,
-          allocated: q.marks, // using "marks" from backend as allocated marks
-          answer: "",
-        }));
+        const attemptData: AttemptQuestion[] = examData.questions.map(
+          (q: ExamQuestion) => ({
+            question: q.question,
+            instructions: q.instructions,
+            allocated: q.marks, // using "marks" from backend as allocated marks
+            answer: "",
+          })
+        );
 
         form.reset({
           examId: examId ?? "",
@@ -79,22 +84,25 @@ export default function StartTechnicalExam() {
 
   // 3) Handle "Submit" the student’s answers
   async function onSubmit(values: FormDataType) {
+    setSubmitting(true); // show loading overlay
     try {
       const response = await fetch("http://localhost:4000/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           examId: values.examId,
-          studentId: "student123",       // Replace with actual student ID as needed
-          studentName: "John Doe",       // Replace with actual student name as needed
+          studentId: "student123", // Replace with actual student ID as needed
+          studentName: "John Doe", // Replace with actual student name as needed
           questions: values.questions,
         }),
       });
       if (!response.ok) throw new Error("Submission failed");
+      setSubmitting(false);
       alert("Submitted successfully!");
       navigate("/find-assignment/t");
     } catch (error) {
       console.error("Error submitting exam: ", error);
+      setSubmitting(false);
       alert("Error submitting exam.");
     }
   }
@@ -108,7 +116,44 @@ export default function StartTechnicalExam() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 relative">
+ {submitting && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center space-y-4 pointer-events-auto border border-blue-400">
+            {/* Spinner Icon */}
+            <svg
+              className="animate-spin h-8 w-8 text-blue-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4.0a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+
+            {/* Submitting Text */}
+            <p className="font-medium text-lg text-gray-800">
+              Submitting your answers...
+            </p>
+            <p className="text-gray-500 text-sm text-center">
+              Please wait without closing or refreshing the page.
+            </p>
+          </div>
+        </div>
+      )}
+
+
       <Button variant="outline" onClick={() => navigate(-1)}>
         ← Back
       </Button>

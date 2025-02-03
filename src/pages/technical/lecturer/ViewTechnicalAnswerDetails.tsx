@@ -171,6 +171,7 @@ export default function ViewTechnicalAnswerDetails() {
                       type="number"
                       min={0}
                       max={fieldItem.allocated}
+                      step="any" 
                       {...field}
                       required
                       className="mt-1"
