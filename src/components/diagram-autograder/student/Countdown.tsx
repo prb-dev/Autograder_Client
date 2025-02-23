@@ -5,7 +5,7 @@ const Countdown = ({ date }: { date: string }) => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const target = new Date(date);
+  const target = new Date(date || 0);
 
   setInterval(() => {
     const now = new Date();
