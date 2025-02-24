@@ -45,13 +45,7 @@ import { Link, Params, useNavigate, useParams } from "react-router-dom";
 import { TypographyH4 } from "@/components/ui/TypographyH4";
 import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type Answer = {
   id: string;
