@@ -82,7 +82,7 @@ const CreateQuestion = () => {
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append("image", values.diagram);
+      formData.append("question", values.question);
 
       const res = await fetch("http://127.0.0.1:8000/questions/create", {
         method: "POST",
