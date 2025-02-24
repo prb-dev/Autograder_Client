@@ -57,6 +57,7 @@ export type Answer = {
   id: string;
   uid: string;
   diagram: string;
+  correct_diagram: string;
   marks: any;
   created_at: string;
 };
@@ -374,17 +375,19 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
   useEffect(() => {
     const fetchAnswer = async () => {
       try {
-        const res = await fetch(
-          `http://127.0.0.1:8000/answers/${params.qid}/${params.aid}`
-        );
-        const data = await res.json();
+        const [res1, res2] = await Promise.all([
+          fetch(`http://127.0.0.1:8000/answers/${params.qid}/${params.aid}`),
+          fetch(`http://127.0.0.1:8000/questions/${params.qid}`),
+        ]);
+        const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 
         const answer = {
-          id: data.answer._id,
-          uid: data.answer.user_id,
-          marks: data.answer.marks,
-          diagram: data.answer.answer.image,
-          created_at: data.answer.created_at,
+          id: data1.answer._id,
+          uid: data1.answer.user_id,
+          marks: data1.answer.marks,
+          diagram: data1.answer.answer.image,
+          correct_diagram: data2.question.correct_answer.image,
+          created_at: data1.answer.created_at,
         };
 
         setAnswer(answer);
@@ -404,7 +407,7 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Answers Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between mb-10">
+            <div className="flex flex-wrap justify-between mb-10">
               <div className="mt-5">
                 <TypographyH4 className="capitalize">Student ID</TypographyH4>
                 <TypographyInlineCode>{answer?.uid}</TypographyInlineCode>
@@ -467,25 +470,43 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
             </Table>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Correct UML Diagram</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative group">
+              <img
+                src={answer?.correct_diagram}
+                alt="Correct UML Diagram"
+                className="w-full h-full rounded-lg border object-cover"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Student's UML Diagram</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative group">
+              <img
+                src={answer?.diagram}
+                alt="Student's UML Diagram"
+                className="w-full rounded-lg border object-cover"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Student's UML Diagram</CardTitle>
-          <CardDescription>
-            Click to toggle between student's diagram and reference solution
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative group">
-            <img
-              src={answer?.diagram}
-              alt="Student's UML Diagram"
-              className="w-full rounded-lg border object-cover"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-end">
+        <Link to={`/view/${params.qid}/a`}>
+          <Button>Done</Button>
+        </Link>
+      </div>
     </div>
   );
 };
