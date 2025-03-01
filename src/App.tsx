@@ -69,7 +69,7 @@ function App() {
                     <>
                       <Route path="/" element={<Home />} />
                       <Route path="/create/q" element={<CreateQuestion />} />
-                      <Route path="/view/q" element={<ViewQuestions />} />
+                      <Route path="/view/q/:qid?" element={<ViewQuestions />} />
                       <Route
                         path="/view/:qid?/a/:aid?"
                         element={<ViewAnswers />}
@@ -119,21 +119,44 @@ function App() {
                 {lecturer ? (
                   <>
                     <Route path="/" element={<Home />} />
-                    <Route path="/create/t" element={<CreateTechnicalQuestion />} />
+                    <Route
+                      path="/create/t"
+                      element={<CreateTechnicalQuestion />}
+                    />
                     <Route path="/view/t" element={<ViewTechnicalExams />} />
-                    <Route path="/launch/t" element={<LaunchTechnicalExams />} />
-                    <Route path="/view/t/:examId" element={<ViewTechnicalExamDetails />} />
-                    <Route path="/view-answers/t/" element={<ViewTechnicalAnswers />} />
-                    <Route path="/view-answers/t/:subId" element={<ViewTechnicalAnswerDetails />} />
-
+                    <Route
+                      path="/launch/t"
+                      element={<LaunchTechnicalExams />}
+                    />
+                    <Route
+                      path="/view/t/:examId"
+                      element={<ViewTechnicalExamDetails />}
+                    />
+                    <Route
+                      path="/view-answers/t/"
+                      element={<ViewTechnicalAnswers />}
+                    />
+                    <Route
+                      path="/view-answers/t/:subId"
+                      element={<ViewTechnicalAnswerDetails />}
+                    />
                   </>
                 ) : (
                   <>
                     <Route path="/" element={<Home />} />
-                    <Route path="/find-assignment/t" element={<FindTechnicalAssignments />} />
-                    <Route path="/find-assignment/t/:examId" element={<StartTechnicalExam />} />
+                    <Route
+                      path="/find-assignment/t"
+                      element={<FindTechnicalAssignments />}
+                    />
+                    <Route
+                      path="/find-assignment/t/:examId"
+                      element={<StartTechnicalExam />}
+                    />
                     <Route path="/marks/t" element={<StudentMarksList />} />
-                    <Route path="/marks/t/:subId" element={<ViewStudentExamMarks />} />
+                    <Route
+                      path="/marks/t/:subId"
+                      element={<ViewStudentExamMarks />}
+                    />
                   </>
                 )}
               </Routes>

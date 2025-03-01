@@ -33,13 +33,20 @@ import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
-import { Link } from "react-router-dom";
+import { Link, Params, useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TypographyH4 } from "@/components/ui/TypographyH4";
+import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 export type Question = {
   _id: string;
@@ -86,9 +93,7 @@ export const columns: ColumnDef<Question>[] = [
     accessorKey: "diagram_type",
     header: () => <div>Diagram Type</div>,
     cell: ({ row }) => (
-      <div className="capitalize font-medium">
-        {row.getValue("diagram_type")}
-      </div>
+      <Badge className="capitalize">{row.getValue("diagram_type")}</Badge>
     ),
   },
   {
@@ -135,10 +140,12 @@ export const columns: ColumnDef<Question>[] = [
               Copy question ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <Link to={`${row.getValue("_id")}`}>
+              <DropdownMenuItem>View question details</DropdownMenuItem>
+            </Link>
             <Link to={`/view/${row.getValue("_id")}/a`}>
               <DropdownMenuItem>View answers </DropdownMenuItem>
             </Link>
-            <DropdownMenuItem>View question details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -147,6 +154,7 @@ export const columns: ColumnDef<Question>[] = [
 ];
 
 const ViewQuestions = () => {
+  const params = useParams();
   const [data, setData] = React.useState([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -190,118 +198,266 @@ const ViewQuestions = () => {
   }, []);
 
   return (
-    <div className="w-full p-5">
-      <TypographyH2>View Questions</TypographyH2>
+    <>
+      {params.qid ? (
+        <ViewQuestion params={params} />
+      ) : (
+        <div className="w-full p-5">
+          <TypographyH2>View Questions</TypographyH2>
 
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter IDs..."
-          value={(table.getColumn("_id")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("_id")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
+          <div className="flex items-center py-4">
+            <Input
+              placeholder="Filter IDs..."
+              value={(table.getColumn("_id")?.getFilterValue() as string) ?? ""}
+              onChange={(event) =>
+                table.getColumn("_id")?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
                           )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
+  const [question, setQuestion] = React.useState<any>();
+  React.useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/questions/${params.qid}`
+        );
+
+        const data = await response.json();
+
+        const question = {
+          id: data.question._id,
+          question: data.question.question,
+          deadline: data.question.deadline,
+          image: data.question.correct_answer.image,
+          rubric: data.question.rubric,
+          count: data.question.answer_count,
+          type: data.question.diagram_type,
+        };
+
+        setQuestion(question);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchQuestion();
+  }, [params.qid]);
+
+  return (
+    <div className="p-5 space-y-5">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-xl">Question Details</CardTitle>
+          <Link to={`/view/${question?.id}/a`}>
+            <Button>View Answers</Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap justify-between mb-10">
+            <div className="mt-5">
+              <TypographyH4 className="capitalize">Question ID</TypographyH4>
+              <TypographyInlineCode>{question?.id}</TypographyInlineCode>
+            </div>
+            <div className="mt-5">
+              <TypographyH4 className="capitalize">Answer count</TypographyH4>
+              <TypographyInlineCode>{question?.count}</TypographyInlineCode>
+            </div>
+            <div className="mt-5 capitalize">
+              <TypographyH4>Type</TypographyH4>
+              <Badge>{question?.type}</Badge>
+            </div>
+            <div className="mt-5">
+              <TypographyH4 className="capitalize">Deadline</TypographyH4>
+              <TypographyInlineCode>{question?.deadline}</TypographyInlineCode>
+            </div>
+          </div>
+          <div className="mt-5 space-y-3">
+            <TypographyH4 className="capitalize">Question</TypographyH4>
+            <p>{question?.question}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Rubric</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="account">
+              <TabsList className="w-full">
+                {question?.rubric.criterias.map((criterion: any) => (
+                  <TabsTrigger
+                    key={criterion.name}
+                    value={criterion.name}
+                    className="capitalize"
+                  >
+                    {criterion.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {question?.rubric.criterias.map((criterion: any) => (
+                <TabsContent key={criterion.name} value={criterion.name}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-center w-1/2">
+                          Correctness
+                        </TableHead>
+                        <TableHead className="text-center">Marks</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="text-center">
+                      {criterion.marks_ranges.map((range: any, i: number) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {`${range.range[0]} - ${range.range[1]} %`}
+                          </TableCell>
+                          <TableCell>{range.marks}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                    <TableFooter className="text-center">
+                      <TableRow>
+                        <TableCell>SubTotal</TableCell>
+                        <TableCell>{criterion.sub_total}</TableCell>
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Answer</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative group">
+              <img
+                src={question?.image}
+                alt="Correct UML Diagram"
+                className="w-full max-h-[500px] rounded-lg border object-scale-down"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+
+      <div className="flex justify-end">
+        <Link to={"/view/q"}>
+          <Button>Done</Button>
+        </Link>
       </div>
     </div>
   );

@@ -474,7 +474,7 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
               <img
                 src={answer?.correct_diagram}
                 alt="Correct UML Diagram"
-                className="w-full h-full rounded-lg border object-cover"
+                className="w-full max-h-[500px] rounded-lg border object-scale-down"
               />
             </div>
           </CardContent>
@@ -489,7 +489,7 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
               <img
                 src={answer?.diagram}
                 alt="Student's UML Diagram"
-                className="w-full rounded-lg border object-cover"
+                className="w-full max-h-[500px] rounded-lg border object-scale-down"
               />
             </div>
           </CardContent>
