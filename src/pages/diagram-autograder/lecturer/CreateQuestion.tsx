@@ -84,10 +84,13 @@ const CreateQuestion = () => {
       const formData = new FormData();
       formData.append("question", values.question);
 
-      const res = await fetch("http://127.0.0.1:8000/questions/create", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/questions/create`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await res.json();
 

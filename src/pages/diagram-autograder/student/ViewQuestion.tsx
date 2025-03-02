@@ -58,7 +58,7 @@ const ViewQuestion = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/questions/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
         );
         const data = await res.json();
         setQuestion(data.question.question);
@@ -87,7 +87,7 @@ const ViewQuestion = () => {
         const imageUrl = await getDownloadURL(snapshot.ref);
 
         const res = await fetch(
-          `http://127.0.0.1:8000/answers/submit/${qid}/${uid}`,
+          `${import.meta.env.VITE_BASE_API_URL}/answers/submit/${qid}/${uid}`,
           {
             method: "POST",
             headers: {
