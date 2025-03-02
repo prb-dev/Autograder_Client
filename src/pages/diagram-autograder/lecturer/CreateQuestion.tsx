@@ -163,6 +163,7 @@ const CreateQuestion = () => {
                             <img
                               src={URL.createObjectURL(selectedImage)}
                               alt={selectedImage.name}
+                              className="w-full max-h-[500px] object-scale-down"
                             />
                           </div>
                         </DialogContent>
