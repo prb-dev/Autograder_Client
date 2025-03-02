@@ -186,7 +186,9 @@ const ViewQuestions = () => {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/questions");
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_API_URL}/questions`
+        );
         const values = await res.json();
         setData(values.questions);
       } catch (error) {
@@ -327,7 +329,7 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
     const fetchQuestion = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/questions/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
         );
 
         const data = await response.json();

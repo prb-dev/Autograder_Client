@@ -183,7 +183,9 @@ const ViewAnswers = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/questions/ids");
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_API_URL}/questions/ids`
+        );
         const data = await res.json();
 
         const ids = data.qids.map((item: any) => item._id);
@@ -206,7 +208,9 @@ const ViewAnswers = () => {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/answers/${params.qid}`);
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_API_URL}/answers/${params.qid}`
+        );
         const data = await res.json();
 
         const answers = data.answers.map((item: any) => ({
@@ -370,8 +374,12 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
     const fetchAnswer = async () => {
       try {
         const [res1, res2] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/answers/${params.qid}/${params.aid}`),
-          fetch(`http://127.0.0.1:8000/questions/${params.qid}`),
+          fetch(
+            `${import.meta.env.VITE_BASE_API_URL}/answers/${params.qid}/${
+              params.aid
+            }`
+          ),
+          fetch(`${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`),
         ]);
         const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 

@@ -158,7 +158,7 @@ const Rubric = ({
         const imageUrl = await getDownloadURL(snapshot.ref);
 
         const res = await fetch(
-          `http://127.0.0.1:8000/questions/${qid}/add/image`,
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${qid}/add/image`,
           {
             method: "POST",
             headers: {
@@ -216,13 +216,16 @@ const Rubric = ({
 
     try {
       setIsLoading(true);
-      const res = await fetch(`http://127.0.0.1:8000/questions/save`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/questions/save`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
 

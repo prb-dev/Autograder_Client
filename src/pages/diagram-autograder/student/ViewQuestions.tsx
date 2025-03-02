@@ -17,7 +17,9 @@ const ViewQuestions = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/questions");
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_API_URL}/questions`
+        );
         const values = await res.json();
         setQuestions(values.questions);
       } catch (error) {
