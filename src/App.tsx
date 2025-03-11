@@ -12,6 +12,7 @@ import { Header } from "./components/ui/Header";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { DiagramSidebar } from "./components/diagram-autograder/lecturer/DiagramSidebar";
 import ViewQuestionsStudent from "./pages/diagram-autograder/student/ViewQuestions";
+import EnglishAutograder from "./pages/english-autograder/englishAutograder";
 
 // 1) Import your new side menus:
 import SideMenuTechnicalLecturer from "./components/technical/lecturer/SideMenuTechnicalLecturer";
@@ -164,7 +165,34 @@ function App() {
           </main>
           <Toaster />
         </>
-      ) : (
+      ) :
+    
+       autograder === "e" ? (
+        <>
+          <main className="flex">
+            {/* 2) Conditionally show side menu for lecturer or student */}
+           
+            <div className="h-[100vh] flex-1">
+              <div className="flex justify-end items-center p-5">
+                <Header toggler={setAutograder} />
+                <div className="flex gap-2 items-center scale-90">
+                  <Switch
+                    id="user-type"
+                    checked={lecturer}
+                    onClick={() => setLecturer(!lecturer)}
+                  />
+                  <Label htmlFor="user-type"> Lecturer </Label>
+                </div>
+              </div>
+
+             
+              < EnglishAutograder />
+            </div>
+          </main>
+          <Toaster />
+        </>
+      ) :
+      (
         // If you want a fallback for other autograders or none selected
         <>
           <div className="flex justify-end items-center p-5 pt-0">
