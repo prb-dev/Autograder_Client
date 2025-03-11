@@ -97,6 +97,10 @@ const ViewQuestion = () => {
           }
         );
 
+        if (res.status !== 200) {
+          throw new Error("An error occurred while submitting the answer.");
+        }
+
         const data = await res.json();
 
         toast({
@@ -105,6 +109,10 @@ const ViewQuestion = () => {
         });
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting the answer.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);
