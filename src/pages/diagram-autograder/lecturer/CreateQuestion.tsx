@@ -35,6 +35,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { QuestionType } from "@/types/QuestionType";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z
   .object({
@@ -55,6 +56,7 @@ const formSchema = z
   );
 
 const CreateQuestion = () => {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [created, setCreated] = useState(false);
   const [question, setQuestion] = useState<QuestionType>({
@@ -81,16 +83,21 @@ const CreateQuestion = () => {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      const formData = new FormData();
-      formData.append("question", values.question);
 
       const res = await fetch(
         `${import.meta.env.VITE_BASE_API_URL}/questions/create`,
         {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values.question),
         }
       );
+
+      if (res.status !== 200) {
+        throw new Error("An error occurred while creating the question.");
+      }
 
       const data = await res.json();
 
@@ -105,6 +112,10 @@ const CreateQuestion = () => {
 
       setCreated(true);
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);
@@ -166,7 +177,7 @@ const CreateQuestion = () => {
                             <img
                               src={URL.createObjectURL(selectedImage)}
                               alt={selectedImage.name}
-                              className="w-full max-h-[500px] object-scale-down"
+                              className="w-full h-full object-scale-down"
                             />
                           </div>
                         </DialogContent>

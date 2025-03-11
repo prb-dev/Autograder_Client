@@ -171,6 +171,10 @@ const Rubric = ({
           }
         );
 
+        if (res.status !== 200) {
+          throw new Error("An error occurred while creating the question.");
+        }
+
         const data = await res.json();
 
         toast({
@@ -181,6 +185,10 @@ const Rubric = ({
         toggler(false);
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
     }
@@ -227,10 +235,18 @@ const Rubric = ({
         }
       );
 
+      if (res.status !== 200) {
+        throw new Error("An error occurred while creating the question.");
+      }
+
       const data = await res.json();
 
       await uploadImage(data.qid, payload.diagram_type);
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);
