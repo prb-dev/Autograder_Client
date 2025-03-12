@@ -270,12 +270,12 @@ const englishAutograder: React.FC = () => {
     const sentences = essay.match(/[^\.!\?]+[\.!\?]+/g) || [];
     setOriginalSentences(sentences);
     setCorrectedSentences(new Array(sentences.length).fill(''));
-    setSentenceErrors(new Array(sentences.length).fill([]));
+    // Removed unused setSentenceErrors call
 
     // Establish WebSocket connection
     connectWebSocket();
   };
-    // Removed sentenceErrors initialization as it is unused
+
   // Cleanup WebSocket connection on unmount
   useEffect(() => {
     return () => {
@@ -336,7 +336,7 @@ ${result.feedback.join('\n')}
       <div className="flex-grow bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
         <div className="relative py-3 sm:max-w-4xl sm:mx-auto">
           {/* Background Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+          <div className=" "></div>
           
           {/* Main Content Container */}
           <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
