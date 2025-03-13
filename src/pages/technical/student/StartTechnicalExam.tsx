@@ -52,7 +52,7 @@ export default function StartTechnicalExam() {
     async function fetchExam() {
       try {
         const response = await fetch(
-          `http://localhost:4000/api/exams/${examId}`
+          `${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams/${examId}`
         );
         if (!response.ok) {
           throw new Error("Exam not found");
@@ -86,7 +86,7 @@ export default function StartTechnicalExam() {
   async function onSubmit(values: FormDataType) {
     setSubmitting(true); // show loading overlay
     try {
-      const response = await fetch("http://localhost:4000/api/submissions", {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
