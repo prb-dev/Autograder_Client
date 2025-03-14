@@ -39,9 +39,11 @@ type TempCriterias = {
 const Rubric = ({
   question,
   toggler,
+  resetForm,
 }: {
   question: QuestionType;
   toggler: React.Dispatch<React.SetStateAction<boolean>>;
+  resetForm: () => void;
 }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -242,6 +244,8 @@ const Rubric = ({
       const data = await res.json();
 
       await uploadImage(data.qid, payload.diagram_type);
+
+      resetForm();
     } catch (error) {
       toast({
         title: "Error",

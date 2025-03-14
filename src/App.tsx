@@ -49,7 +49,7 @@ function App() {
       {autograder === "d" ? (
         <>
           <SidebarProvider>
-            <DiagramSidebar />
+            <DiagramSidebar lecturer={lecturer} />
             <main className="flex-1">
               <SidebarTrigger />
               <div className="h-[100vh]">
