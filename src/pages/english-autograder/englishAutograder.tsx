@@ -27,21 +27,9 @@ const SideMenuTechnicalLecturer = () => {
       group: {
         heading: "Questions",
         items: [
-          {
-            link: "/create/t",
-            icon: <FilePlusIcon className="mr-2 h-4 w-4" />,
-            text: "Create",
-          },
-          {
-            link: "/view/t",
-            icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
-            text: "View",
-          },
-          {
-            link: "/launch/t",
-            icon: <RocketIcon className="mr-2 h-4 w-4" />,
-            text: "Launch",
-          },
+          { link: "/create/t", icon: <FilePlusIcon className="mr-2 h-4 w-4" />, text: "Create" },
+          { link: "/view/t", icon: <EyeOpenIcon className="mr-2 h-4 w-4" />, text: "View" },
+          { link: "/launch/t", icon: <RocketIcon className="mr-2 h-4 w-4" />, text: "Launch" },
         ],
       },
     },
@@ -49,11 +37,7 @@ const SideMenuTechnicalLecturer = () => {
       group: {
         heading: "Answers",
         items: [
-          {
-            link: "/view-answers/t",
-            icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
-            text: "View",
-          },
+          { link: "/view-answers/t", icon: <EyeOpenIcon className="mr-2 h-4 w-4" />, text: "View" },
         ],
       },
     },
@@ -61,21 +45,9 @@ const SideMenuTechnicalLecturer = () => {
       group: {
         heading: "Settings",
         items: [
-          {
-            link: "/profile/t",
-            icon: <PersonIcon className="mr-2 h-4 w-4" />,
-            text: "Profile",
-          },
-          {
-            link: "/mail/t",
-            icon: <EnvelopeClosedIcon className="mr-2 h-4 w-4" />,
-            text: "Mail",
-          },
-          {
-            link: "/settings/t",
-            icon: <GearIcon className="mr-2 h-4 w-4" />,
-            text: "Settings",
-          },
+          { link: "/profile/t", icon: <PersonIcon className="mr-2 h-4 w-4" />, text: "Profile" },
+          { link: "/mail/t", icon: <EnvelopeClosedIcon className="mr-2 h-4 w-4" />, text: "Mail" },
+          { link: "/settings/t", icon: <GearIcon className="mr-2 h-4 w-4" />, text: "Settings" },
         ],
       },
     },
@@ -159,8 +131,7 @@ interface ErrorMessage {
 
 type ServerMessage = ProgressMessage | ResultMessage | ErrorMessage;
 
-const englishAutograder: React.FC = () => {
-  // State Variables
+const EnglishAutograder: React.FC = () => {
   const [essay, setEssay] = useState<string>('');
   const [result, setResult] = useState<GradingResult | null>(null);
   const [progress, setProgress] = useState<number>(0);
@@ -177,11 +148,9 @@ const englishAutograder: React.FC = () => {
   const [correctedSentences, setCorrectedSentences] = useState<string[]>([]);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState<number>(-1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Removed unused sentenceErrors state
 
   const wsRef = useRef<ReconnectingWebSocket | null>(null);
 
-  // Handle changes in grading parameters
   const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setGradingParams(prev => ({
@@ -190,13 +159,11 @@ const englishAutograder: React.FC = () => {
     }));
   };
 
-  // Establish WebSocket connection
   const connectWebSocket = useCallback(() => {
     const rws = new ReconnectingWebSocket('ws://localhost:8000/grade');
 
     rws.addEventListener('open', () => {
       console.log('WebSocket connection opened');
-      // Send the essay data
       rws.send(JSON.stringify({
         essay: essay,
         essay_type: essayType,
@@ -211,21 +178,13 @@ const englishAutograder: React.FC = () => {
 
         if (data.type === 'progress') {
           const { sentence_index, total_sentences, corrected, original, detailed_errors } = data;
-
-          // Update correctedSentences array
           setCorrectedSentences(prev => {
             const newCorrected = [...prev];
-            newCorrected[sentence_index] = corrected || original || '';
+            newCorrected[sentence_index - 1] = corrected || original || ''; // Adjust for 1-based index
             return newCorrected;
           });
-
-          // Removed sentence errors update as it is unused
-
-          // Update progress
-          setProgress(((sentence_index + 1) / total_sentences) * 100);
-
-          // Update current sentence index
-          setCurrentSentenceIndex(sentence_index);
+          setProgress((sentence_index / total_sentences) * 100);
+          setCurrentSentenceIndex(sentence_index - 1);
         } else if (data.type === 'result') {
           setResult(data.data);
           setIsGrading(false);
@@ -258,7 +217,6 @@ const englishAutograder: React.FC = () => {
     wsRef.current = rws;
   }, [essay, essayType, gradingParams]);
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsGrading(true);
@@ -266,17 +224,13 @@ const englishAutograder: React.FC = () => {
     setProgress(0);
     setErrorMessage(null);
 
-    // Split essay into sentences
     const sentences = essay.match(/[^\.!\?]+[\.!\?]+/g) || [];
     setOriginalSentences(sentences);
     setCorrectedSentences(new Array(sentences.length).fill(''));
-    // Removed unused setSentenceErrors call
 
-    // Establish WebSocket connection
     connectWebSocket();
   };
 
-  // Cleanup WebSocket connection on unmount
   useEffect(() => {
     return () => {
       if (wsRef.current) {
@@ -285,7 +239,6 @@ const englishAutograder: React.FC = () => {
     };
   }, []);
 
-  // Download report as a text file
   const downloadReport = () => {
     if (result) {
       const report = `
@@ -313,7 +266,6 @@ ${result.detailed_errors.map(error => `${error.type} Error: "${error.original}" 
 Feedback:
 ${result.feedback.join('\n')}
       `;
-
       const blob = new Blob([report], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -328,23 +280,13 @@ ${result.feedback.join('\n')}
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar/>
-      {/* Sidebar */}
-       
-
-      {/* Main Content */}
+      <Sidebar />
       <div className="flex-grow bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
         <div className="relative py-3 sm:max-w-4xl sm:mx-auto">
-          {/* Background Gradient */}
-          <div className=" "></div>
-          
-          {/* Main Content Container */}
           <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
             <h1 className="text-4xl font-bold mb-5 text-gray-800 text-center">AI Essay Grading</h1>
             
-            {/* Essay Submission Form */}
             <form onSubmit={handleSubmit} className="mb-5">
-              {/* Essay Type Selection */}
               <div className="mb-4">
                 <label htmlFor="essayType" className="block text-sm font-medium text-gray-700">Essay Type</label>
                 <select
@@ -360,7 +302,6 @@ ${result.feedback.join('\n')}
                 </select>
               </div>
               
-              {/* Grading Parameters */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label htmlFor="min_word_count" className="block text-sm font-medium text-gray-700">Min Word Count</label>
@@ -435,7 +376,6 @@ ${result.feedback.join('\n')}
                 </div>
               </div>
 
-              {/* Essay Textarea */}
               <div className="mb-4">
                 <label htmlFor="essay" className="block text-sm font-medium text-gray-700">Essay</label>
                 <textarea
@@ -449,7 +389,6 @@ ${result.feedback.join('\n')}
                 ></textarea>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isGrading}
@@ -461,14 +400,12 @@ ${result.feedback.join('\n')}
               </button>
             </form>
 
-            {/* Error Display */}
             {errorMessage && (
               <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
                 <p>Error: {errorMessage}</p>
               </div>
             )}
 
-            {/* Grading Progress */}
             {isGrading && (
               <div className="mt-6">
                 <h2 className="text-xl font-semibold mb-3">Grading Progress</h2>
@@ -502,12 +439,10 @@ ${result.feedback.join('\n')}
               </div>
             )}
 
-            {/* Grading Results */}
             {result && (
               <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Grading Results</h2>
                 
-                {/* Scores Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div className="p-4 bg-blue-100 rounded-lg">
                     <h3 className="text-lg font-semibold text-blue-800">Overall Score</h3>
@@ -533,7 +468,6 @@ ${result.feedback.join('\n')}
                   )}
                 </div>
 
-                {/* Additional Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div className="p-4 bg-pink-100 rounded-lg">
                     <h3 className="text-lg font-semibold text-pink-800">Error Rate</h3>
@@ -545,7 +479,6 @@ ${result.feedback.join('\n')}
                   </div>
                 </div>
 
-                {/* Feedback */}
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">Feedback</h3>
                   <ul className="list-disc list-inside space-y-2">
@@ -555,7 +488,6 @@ ${result.feedback.join('\n')}
                   </ul>
                 </div>
 
-                {/* Detailed Errors */}
                 {result.detailed_errors && result.detailed_errors.length > 0 && (
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">Detailed Errors</h3>
@@ -573,7 +505,6 @@ ${result.feedback.join('\n')}
                   </div>
                 )}
 
-                {/* Original and Corrected Essays */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <h4 className="text-lg font-semibold text-gray-800 mb-2">Original Essay</h4>
@@ -585,7 +516,6 @@ ${result.feedback.join('\n')}
                   </div>
                 </div>
 
-                {/* Download Report Button */}
                 <div className="mt-6 text-center">
                   <button
                     onClick={downloadReport}
@@ -603,4 +533,4 @@ ${result.feedback.join('\n')}
   );
 };
 
-export default englishAutograder;
+export default EnglishAutograder;

@@ -32,6 +32,8 @@
     "date-fns": "^3.6.0",
     "firebase": "^10.13.1",
     "lucide-react": "^0.439.0",
+    "mammoth": "^1.9.0",
+    "pdfjs-dist": "^4.10.38",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

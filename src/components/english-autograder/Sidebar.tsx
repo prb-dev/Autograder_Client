@@ -10,31 +10,51 @@ import {
 import {
   Command,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
 
-const EnglishEssaySidebar: React.FC = () => {
+interface SidebarProps {
+  onUploadEssay: () => void;
+  onViewResults: () => void;
+  onDownloadReport: () => void;
+}
+
+const EnglishEssaySidebar: React.FC<SidebarProps> = ({ onUploadEssay, onViewResults, onDownloadReport }) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === 'upload') {
+      onUploadEssay();
+    } else if (value === 'view') {
+      onViewResults();
+    } else if (value === 'download') {
+      onDownloadReport();
+    }
+  };
+
   return (
     <aside className="h-screen w-64 p-4 border-r bg-white">
       <Command className="rounded-lg border shadow-md">
-        <CommandInput placeholder="Type a command or search..." />
-
+        <select onChange={handleSelectChange} className="w-full p-2 border rounded-md mb-4">
+          <option value="">Select Command</option>
+          <option value="upload">Upload Essay</option>
+          <option value="view">View Results</option>
+          <option value="download">Download Report</option>
+        </select>
         <CommandList>
           {/* AI Essay Grading Section */}
           <CommandGroup heading="AI Essay Grading">
-            <CommandItem>
+            <CommandItem onSelect={onUploadEssay}>
               <FilePlusIcon className="mr-2 h-4 w-4" />
               Upload Essay
             </CommandItem>
-            <CommandItem>
+            <CommandItem onSelect={onViewResults}>
               <EyeOpenIcon className="mr-2 h-4 w-4" />
               View Results
             </CommandItem>
-            <CommandItem>
+            <CommandItem onSelect={onDownloadReport}>
               <RocketIcon className="mr-2 h-4 w-4" />
-              Launch Grading
+              Download Report
             </CommandItem>
           </CommandGroup>
 
