@@ -19,28 +19,46 @@ import {
 import { Link } from "react-router-dom";
 
 // Menu items.
-const questionItems = [
-  {
-    title: "Create",
-    url: "/create/q",
-    icon: FilePlus,
-  },
-  {
-    title: "View",
-    url: "/view/q",
-    icon: Eye,
-  },
-];
+const lecturerItems = {
+  questionItems: [
+    {
+      title: "Create",
+      url: "/create/q",
+      icon: FilePlus,
+    },
+    {
+      title: "View",
+      url: "/view/q",
+      icon: Eye,
+    },
+  ],
+  answerItems: [
+    {
+      title: "View",
+      url: "/view/a",
+      icon: Eye,
+    },
+  ],
+};
 
-const answerItems = [
-  {
-    title: "View",
-    url: "/view/a",
-    icon: Eye,
-  },
-];
+const studentItems = {
+  questionItems: [
+    {
+      title: "View",
+      url: "/view/q",
+      icon: Eye,
+    },
+  ],
+  answerItems: [
+    {
+      title: "View",
+      url: "/view/a",
+      icon: Eye,
+    },
+  ],
+};
 
-export function DiagramSidebar() {
+export function DiagramSidebar({ lecturer }: { lecturer: boolean }) {
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
@@ -61,16 +79,27 @@ export function DiagramSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {questionItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {lecturer === true
+                    ? lecturerItems.questionItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))
+                    : studentItems.questionItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
@@ -90,16 +119,27 @@ export function DiagramSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {answerItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {lecturer === true
+                    ? lecturerItems.answerItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))
+                    : studentItems.answerItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
