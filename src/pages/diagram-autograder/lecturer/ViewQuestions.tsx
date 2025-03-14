@@ -190,7 +190,7 @@ const ViewQuestions = () => {
           `${import.meta.env.VITE_BASE_API_URL}/questions`
         );
         const values = await res.json();
-        setData(values.questions);
+        setData(values.questions.reverse());
       } catch (error) {
         console.log(error);
       }
