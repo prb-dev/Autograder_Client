@@ -40,7 +40,7 @@ export default function StudentMarksList() {
       }
 
       try {
-        const response = await fetch(`http://localhost:4000/api/submissions/student/${studentId}`);
+        const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/student/${studentId}`);
         if (!response.ok) throw new Error("Failed to fetch submissions");
         const data: StudentSubmission[] = await response.json();
         setSubmissions(data);

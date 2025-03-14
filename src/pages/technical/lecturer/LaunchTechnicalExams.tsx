@@ -20,7 +20,7 @@ export default function LaunchTechnicalExams() {
   useEffect(() => {
     async function fetchExams() {
       try {
-        const res = await fetch("http://localhost:4000/api/exams");
+        const res = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams`);
         if (!res.ok) throw new Error("Failed to fetch exams");
         const data: Exam[] = await res.json();
         setExams(data);
@@ -34,7 +34,7 @@ export default function LaunchTechnicalExams() {
   // 2) LAUNCH exam (POST /exams/:id/launch)
   async function handleLaunch(examId: string) {
     try {
-      const response = await fetch(`http://localhost:4000/api/exams/${examId}/launch`, {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams/${examId}/launch`, {
         method: "POST",
       });
       if (!response.ok) throw new Error("Failed to launch exam");
@@ -55,7 +55,7 @@ export default function LaunchTechnicalExams() {
   // 3) DISABLE exam (POST /exams/:id/disable)
   async function handleDisable(examId: string) {
     try {
-      const response = await fetch(`http://localhost:4000/api/exams/${examId}/disable`, {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams/${examId}/disable`, {
         method: "POST",
       });
       if (!response.ok) throw new Error("Failed to disable exam");

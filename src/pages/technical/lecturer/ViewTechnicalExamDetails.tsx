@@ -69,7 +69,7 @@ export default function ViewTechnicalExamDetails() {
   useEffect(() => {
     async function fetchExam() {
       try {
-        const res = await fetch(`http://localhost:4000/api/exams/${examId}`);
+        const res = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams/${examId}`);
         if (!res.ok) throw new Error("Exam not found");
         const exam = await res.json();
 
@@ -90,7 +90,7 @@ export default function ViewTechnicalExamDetails() {
     console.log("Updated exam =>", values);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/exams/${values._id}`,
+        `${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams/${values._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

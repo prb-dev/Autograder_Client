@@ -53,7 +53,7 @@ export default function ViewTechnicalAnswerDetails() {
   useEffect(() => {
     async function fetchSubmission() {
       try {
-        const response = await fetch(`http://localhost:4000/api/submissions/${subId}`);
+        const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/${subId}`);
         if (!response.ok) throw new Error("Submission not found");
         const data: SubmissionDetail = await response.json();
 
@@ -93,7 +93,7 @@ export default function ViewTechnicalAnswerDetails() {
         reviewed: true, // Mark as reviewed
       };
 
-      const response = await fetch(`http://localhost:4000/api/submissions/${values._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/${values._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedSubmission),

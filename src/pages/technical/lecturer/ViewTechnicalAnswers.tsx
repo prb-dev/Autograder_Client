@@ -32,8 +32,8 @@ export default function ViewTechnicalAnswers() {
       try {
         // Determine URL based on presence of examId
         const url = examId
-          ? `http://localhost:4000/api/submissions/exam/${examId}`
-          : `http://localhost:4000/api/submissions`;
+          ? `${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/exam/${examId}`
+          : `${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions`;
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch submissions");
         const data: AnsweredExam[] = await response.json();
@@ -57,7 +57,7 @@ export default function ViewTechnicalAnswers() {
   async function handleDeleteSubmission(subId: string) {
     if (!window.confirm(`Are you sure you want to delete submission ${subId}?`)) return;
     try {
-      const response = await fetch(`http://localhost:4000/api/submissions/${subId}`, {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/${subId}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Deletion failed");
@@ -71,7 +71,7 @@ export default function ViewTechnicalAnswers() {
 
   async function handleDownloadPdf(subId: string) {
     try {
-      const response = await fetch(`http://localhost:4000/api/submissions/${subId}/pdf`, {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/${subId}/pdf`, {
         method: "GET",
         headers: {
           // Include authentication headers if required
