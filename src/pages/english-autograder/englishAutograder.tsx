@@ -149,6 +149,10 @@ const EnglishAutograder: React.FC = () => {
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState<number>(-1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [enableGrammar, setEnableGrammar] = useState(true);
+  const [enableVocabulary, setEnableVocabulary] = useState(true);
+  const [enableCreativity, setEnableCreativity] = useState(true);
+
   const wsRef = useRef<ReconnectingWebSocket | null>(null);
 
   const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,15 +163,62 @@ const EnglishAutograder: React.FC = () => {
     }));
   };
 
+  const handleComponentToggle = (component: 'grammar' | 'vocabulary' | 'creativity', enabled: boolean) => {
+    switch(component) {
+      case 'grammar':
+        setEnableGrammar(enabled);
+        break;
+      case 'vocabulary':
+        setEnableVocabulary(enabled);
+        break;
+      case 'creativity':
+        setEnableCreativity(enabled);
+        break;
+    }
+    
+    // Recalculate weights
+    const weights = {
+      grammar: enableGrammar ? 1 : 0,
+      vocabulary: enableVocabulary ? 1 : 0,
+      creativity: enableCreativity ? 1 : 0,
+    };
+    
+    // Get sum of enabled weights
+    const sum = Object.values(weights).reduce((a, b) => a + b, 0);
+    
+    if (sum > 0) {
+      setGradingParams(prev => ({
+        ...prev,
+        grammar_weight: weights.grammar / sum,
+        vocabulary_weight: weights.vocabulary / sum,
+        creativity_weight: weights.creativity / sum,
+      }));
+    }
+  };
+
   const connectWebSocket = useCallback(() => {
     const rws = new ReconnectingWebSocket('ws://localhost:8000/grade');
 
     rws.addEventListener('open', () => {
       console.log('WebSocket connection opened');
+      // Normalize weights before sending
+      const { grammar_weight, vocabulary_weight, creativity_weight } = gradingParams;
+      let normalizedParams;
+      if (vocabulary_weight === 0 && creativity_weight === 0) {
+        normalizedParams = { ...gradingParams, grammar_weight: 1, vocabulary_weight: 0, creativity_weight: 0 };
+      } else {
+        const sum = grammar_weight + vocabulary_weight + creativity_weight;
+        normalizedParams = {
+          ...gradingParams,
+          grammar_weight: parseFloat((grammar_weight / sum).toFixed(2)),
+          vocabulary_weight: parseFloat((vocabulary_weight / sum).toFixed(2)),
+          creativity_weight: parseFloat((creativity_weight / sum).toFixed(2)),
+        };
+      }
       rws.send(JSON.stringify({
         essay: essay,
         essay_type: essayType,
-        grading_params: gradingParams
+        grading_params: normalizedParams
       }));
     });
 
@@ -329,50 +380,52 @@ ${result.feedback.join('\n')}
                     required
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label htmlFor="grammar_weight" className="block text-sm font-medium text-gray-700">Grammar Weight</label>
-                  <input
-                    type="number"
-                    id="grammar_weight"
-                    name="grammar_weight"
-                    value={gradingParams.grammar_weight}
-                    onChange={handleParamChange}
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    required
-                  />
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={enableGrammar}
+                      onChange={(e) => handleComponentToggle('grammar', e.target.checked)}
+                      className="form-checkbox"
+                    />
+                    <span>Grammar Grading</span>
+                  </label>
+                  {enableGrammar && (
+                    <p className="text-sm text-gray-600">Weight: {(gradingParams.grammar_weight * 100).toFixed(0)}%</p>
+                  )}
                 </div>
+                
                 <div>
-                  <label htmlFor="vocabulary_weight" className="block text-sm font-medium text-gray-700">Vocabulary Weight</label>
-                  <input
-                    type="number"
-                    id="vocabulary_weight"
-                    name="vocabulary_weight"
-                    value={gradingParams.vocabulary_weight}
-                    onChange={handleParamChange}
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    required
-                  />
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={enableVocabulary}
+                      onChange={(e) => handleComponentToggle('vocabulary', e.target.checked)}
+                      className="form-checkbox"
+                    />
+                    <span>Vocabulary Grading</span>
+                  </label>
+                  {enableVocabulary && (
+                    <p className="text-sm text-gray-600">Weight: {(gradingParams.vocabulary_weight * 100).toFixed(0)}%</p>
+                  )}
                 </div>
+                
                 <div>
-                  <label htmlFor="creativity_weight" className="block text-sm font-medium text-gray-700">Creativity Weight</label>
-                  <input
-                    type="number"
-                    id="creativity_weight"
-                    name="creativity_weight"
-                    value={gradingParams.creativity_weight}
-                    onChange={handleParamChange}
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    required
-                  />
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={enableCreativity}
+                      onChange={(e) => handleComponentToggle('creativity', e.target.checked)}
+                      className="form-checkbox"
+                    />
+                    <span>Creativity Grading</span>
+                  </label>
+                  {enableCreativity && (
+                    <p className="text-sm text-gray-600">Weight: {(gradingParams.creativity_weight * 100).toFixed(0)}%</p>
+                  )}
                 </div>
               </div>
 
@@ -448,19 +501,19 @@ ${result.feedback.join('\n')}
                     <h3 className="text-lg font-semibold text-blue-800">Overall Score</h3>
                     <p className="text-3xl font-bold text-blue-600">{result.score}/10</p>
                   </div>
-                  {result.grammar_score !== null && (
+                  {enableGrammar && result.grammar_score !== null && (
                     <div className="p-4 bg-green-100 rounded-lg">
                       <h3 className="text-lg font-semibold text-green-800">Grammar Score</h3>
                       <p className="text-3xl font-bold text-green-600">{result.grammar_score}/10</p>
                     </div>
                   )}
-                  {result.vocabulary_score !== null && (
+                  {enableVocabulary && result.vocabulary_score !== null && (
                     <div className="p-4 bg-purple-100 rounded-lg">
                       <h3 className="text-lg font-semibold text-purple-800">Vocabulary Score</h3>
                       <p className="text-3xl font-bold text-purple-600">{result.vocabulary_score}/10</p>
                     </div>
                   )}
-                  {result.creativity_score !== null && (
+                  {enableCreativity && result.creativity_score !== null && (
                     <div className="p-4 bg-yellow-100 rounded-lg">
                       <h3 className="text-lg font-semibold text-yellow-800">Creativity Score</h3>
                       <p className="text-3xl font-bold text-yellow-600">{result.creativity_score}/10</p>
