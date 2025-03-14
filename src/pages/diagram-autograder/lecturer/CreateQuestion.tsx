@@ -122,14 +122,13 @@ const CreateQuestion = () => {
     }
   };
 
+  const resetForm = () => {
+    form.reset();
+  };
+
   return (
     <>
-      <div
-        className={clsx(
-          "overflow-y-scroll flex justify-start p-5",
-          created && "hidden"
-        )}
-      >
+      <div className={clsx("flex justify-start p-5", created && "hidden")}>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -258,13 +257,12 @@ const CreateQuestion = () => {
           </form>
         </Form>
       </div>
-      <div
-        className={clsx(
-          "h-[100vh] overflow-y-scroll flex p-5",
-          !created && "hidden"
-        )}
-      >
-        <Rubric question={question} toggler={setCreated} />
+      <div className={clsx("h-[100vh] flex p-5", !created && "hidden")}>
+        <Rubric
+          question={question}
+          toggler={setCreated}
+          resetForm={resetForm}
+        />
       </div>
     </>
   );
