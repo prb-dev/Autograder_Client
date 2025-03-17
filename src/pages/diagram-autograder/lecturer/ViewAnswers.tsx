@@ -1,7 +1,7 @@
+import * as React from "react";
 import { Combobox } from "@/components/ui/combobox";
 import { TypographyH2 } from "@/components/ui/TypographyH2";
 import { useEffect, useState } from "react";
-import * as React from "react";
 import {
   CaretSortIcon,
   ChevronDownIcon,
@@ -46,6 +46,8 @@ import { TypographyH4 } from "@/components/ui/TypographyH4";
 import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReactJson from "react-json-view";
 
 export type Answer = {
   id: string;
@@ -368,7 +370,7 @@ const ViewAnswers = () => {
 };
 
 const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
-  const [answer, setAnswer] = useState<Answer>();
+  const [answer, setAnswer] = useState<any>();
 
   useEffect(() => {
     const fetchAnswer = async () => {
@@ -388,7 +390,9 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
           uid: data1.answer.user_id,
           marks: data1.answer.marks,
           diagram: data1.answer.answer.image,
+          textObject: data1.answer.answer.text_representation,
           correct_diagram: data2.question.correct_answer.image,
+          correct_textObject: data2.question.correct_answer.text_representation,
           created_at: data1.answer.created_at,
         };
 
@@ -478,13 +482,28 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Correct UML Diagram</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative group">
-              <img
-                src={answer?.correct_diagram}
-                alt="Correct UML Diagram"
-                className="w-full max-h-[500px] rounded-lg border object-scale-down"
-              />
-            </div>
+            <Tabs defaultValue="image">
+              <TabsList className="w-full">
+                <TabsTrigger key="image" value="image" className="capitalize">
+                  Image
+                </TabsTrigger>
+                <TabsTrigger key="json" value="json" className="capitalize">
+                  Json
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="image">
+                <img
+                  src={answer?.correct_diagram}
+                  alt="Correct UML Diagram"
+                  className="w-full max-h-[500px] rounded-lg border object-scale-down"
+                />
+              </TabsContent>
+              <TabsContent value="json">
+                <div className="w-full max-h-[500px] overflow-auto">
+                  <ReactJson src={answer?.correct_textObject} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
@@ -493,13 +512,28 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Student's UML Diagram</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative group">
-              <img
-                src={answer?.diagram}
-                alt="Student's UML Diagram"
-                className="w-full max-h-[500px] rounded-lg border object-scale-down"
-              />
-            </div>
+            <Tabs defaultValue="image">
+              <TabsList className="w-full">
+                <TabsTrigger key="image" value="image" className="capitalize">
+                  Image
+                </TabsTrigger>
+                <TabsTrigger key="json" value="json" className="capitalize">
+                  Json
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="image">
+                <img
+                  src={answer?.diagram}
+                  alt="Student's UML Diagram"
+                  className="w-full max-h-[500px] rounded-lg border object-scale-down"
+                />
+              </TabsContent>
+              <TabsContent value="json">
+                <div className="w-full max-h-[500px] overflow-auto">
+                  <ReactJson src={answer?.textObject} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
