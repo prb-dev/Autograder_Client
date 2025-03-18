@@ -9,6 +9,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@radix-ui/react-label";
 import { useEffect, useState } from "react";
 import { Header } from "./components/ui/Header";
+
+import SideMenuPro from "./components/diagram-autograder/lecturer/SideMenuPro";
+import CreateProgrammingQ from "./pages/program-auotgrader/lecturer/CreateProgrammingQ";
+import ViewProAssignments from "./pages/program-auotgrader/lecturer/ViewProAssignments";
+import SideMenuStu from "./components/programming-autograder/student/SideMenuStu";
+import ViewStudentAssignments from "./pages/program-auotgrader/Student/ViewStudentAssignments";
+import ViewSingleAssignment from "./pages/program-auotgrader/Student/ViewSingleAssignment";
+import ViewSubmissions from "./pages/program-auotgrader/lecturer/ViewSubmissions";
+import ViewSubmissionDetails from "./pages/program-auotgrader/lecturer/ViewSubmissionDetails";
+
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { DiagramSidebar } from "./components/diagram-autograder/lecturer/DiagramSidebar";
 import ViewQuestionsStudent from "./pages/diagram-autograder/student/ViewQuestions";
@@ -161,6 +171,63 @@ function App() {
                     <Route
                       path="/marks/t/:subId"
                       element={<ViewStudentExamMarks />}
+                    />
+                  </>
+                )}
+              </Routes>
+            </div>
+          </main>
+          <Toaster />
+        </>
+      ) : autograder == "p" ? (
+        <>
+          <main className="flex">
+            {lecturer ? <SideMenuPro /> : <SideMenuStu />}
+
+            <div className="flex-1">
+              <div className="flex justify-end items-center p-5">
+                <Header toggler={setAutograder} />
+                <div className="flex gap-2 items-center scale-90">
+                  <Switch
+                    id="user-type"
+                    checked={lecturer}
+                    onClick={() => setLecturer(!lecturer)}
+                  />
+                  <Label htmlFor="user-type"> Lecturer </Label>
+                </div>
+              </div>
+              <Routes>
+                {lecturer ? (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route
+                      path="/procreate/q"
+                      element={<CreateProgrammingQ />}
+                    />
+                    <Route
+                      path="/pro/View/q"
+                      element={<ViewProAssignments />}
+                    />
+                    <Route
+                      path="/submissions/:assignmentId"
+                      element={<ViewSubmissions />}
+                    />
+                    <Route
+                      path="/submissions/details/:submissionId"
+                      element={<ViewSubmissionDetails />}
+                    />
+                    {/* <Route path="/view/a" element={<ViewAnswers />} /> */}
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route
+                      path="/findAssignment"
+                      element={<ViewStudentAssignments />}
+                    />
+                    <Route
+                      path="stu/assignment/:assignmentId"
+                      element={<ViewSingleAssignment />}
                     />
                   </>
                 )}
