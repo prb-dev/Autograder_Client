@@ -186,13 +186,16 @@ const ViewAnswers = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions/ids`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/ids`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
 
         const ids = data.qids.map((item: any) => item._id);
 
-        setQids(ids);
+        setQids(ids.reverse());
       } catch (error) {
         console.log(error);
       }
@@ -211,7 +214,10 @@ const ViewAnswers = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/answers/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/answers/${params.qid}`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
 
@@ -223,7 +229,7 @@ const ViewAnswers = () => {
           created_at: item.created_at,
         }));
 
-        setData(answers);
+        setData(answers.reverse());
       } catch (error) {
         console.log(error);
       }
@@ -379,9 +385,15 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
           fetch(
             `${import.meta.env.VITE_BASE_API_URL}/answers/${params.qid}/${
               params.aid
-            }`
+            }`,
+            {
+              credentials: "include",
+            }
           ),
-          fetch(`${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`),
+          fetch(
+            `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`,
+            { credentials: "include" }
+          ),
         ]);
         const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 
@@ -457,7 +469,7 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
                       <TableRow key={key}>
                         <TableCell className="capitalize">{key}</TableCell>
                         <TableCell className="font-mono">
-                          <Badge>{value.correctness}%</Badge>
+                          <Badge>{value.correctness.toFixed(0)}%</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono">
                           {value.mark}

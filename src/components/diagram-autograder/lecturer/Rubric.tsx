@@ -166,6 +166,7 @@ const Rubric = ({
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({
               url: imageUrl,
               diagram_type: diagramType,
@@ -233,6 +234,7 @@ const Rubric = ({
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify(payload),
         }
       );
