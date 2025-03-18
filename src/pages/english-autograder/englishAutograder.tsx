@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { Link } from "react-router-dom";
-import Sidebar from "@/components/english-autograder/Sidebar";
+import Sidebar from "../../components/english-autograder/Sidebar";
 import {
   EnvelopeClosedIcon,
   EyeOpenIcon,
@@ -143,6 +143,28 @@ const EnglishAutograder: React.FC = () => {
     vocabulary_weight: 0.35,
     creativity_weight: 0.3,
   });
+
+ 
+
+  // 🏷️ This function is called when the user selects a `.docx` in the sidebar
+  const handleUploadEssay = (text: string) => {
+    setEssay(text); // <-- This updates the <textarea> with the docx content
+  };
+
+   
+  const handleViewResults = () => {
+    // Possibly scroll to your "Results" section or open a modal
+    const resultsSection = document.getElementById("results-section");
+    resultsSection?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleDownloadReport = () => {
+    // Your existing download logic
+    console.log("Download report clicked");
+  };
+
+
+
   const [isGrading, setIsGrading] = useState<boolean>(false);
   const [originalSentences, setOriginalSentences] = useState<string[]>([]);
   const [correctedSentences, setCorrectedSentences] = useState<string[]>([]);
@@ -331,8 +353,13 @@ ${result.feedback.join('\n')}
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-grow bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+
+      <Sidebar
+       onUploadEssay={handleUploadEssay} 
+       onViewResults={handleViewResults} 
+       onDownloadReport={downloadReport} 
+      />
+      <div className="flex-grow bg-gray-100 py-6 pl-60 flex flex-col justify-center sm:py-12">
         <div className="relative py-3 sm:max-w-4xl sm:mx-auto">
           <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
             <h1 className="text-4xl font-bold mb-5 text-gray-800 text-center">AI Essay Grading</h1>
@@ -492,8 +519,8 @@ ${result.feedback.join('\n')}
               </div>
             )}
 
-            {result && (
-              <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
+            {result &&  (
+              <div id="results-section"  className="mt-8 p-6 bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Grading Results</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
