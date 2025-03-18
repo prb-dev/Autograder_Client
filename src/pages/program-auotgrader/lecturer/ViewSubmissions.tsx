@@ -108,7 +108,7 @@ const ViewSubmissions = () => {
       rowSelection,
     },
   });
-  const url = import.meta.env.VITE_API_URL;
+  const url = import.meta.env.VITE_API_PRO_URL;
   React.useEffect(() => {
     const fetchData = async () => {
       try {

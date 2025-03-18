@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 const ViewStudentAssignments = () => {
   const [assignments, setAssignments] = useState([]);
   const navigate = useNavigate();
-  const url = import.meta.env.VITE_API_URL;
+  const url = import.meta.env.VITE_API_PRO_URL;
   useEffect(() => {
     const fetchAssignments = async () => {
       try {

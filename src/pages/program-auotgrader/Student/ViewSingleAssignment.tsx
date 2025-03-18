@@ -17,7 +17,7 @@ const ViewSingleAssignment = () => {
   const { register, handleSubmit, reset } = useForm();
   const [isLoading, setIsLoading] = useState(false);
 
-  const url = import.meta.env.VITE_API_URL;
+  const url = import.meta.env.VITE_API_PRO_URL;
 
   useEffect(() => {
     const fetchAssignment = async () => {
@@ -51,16 +51,13 @@ const ViewSingleAssignment = () => {
         rubric: assignment.rubric,
       };
 
-      const res = await fetch(
-        "http://localhost:5001/api/submissions/evaluate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const res = await fetch(`${url}/api/submissions/evaluate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to submit answer");
