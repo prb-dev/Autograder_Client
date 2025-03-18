@@ -97,7 +97,7 @@ const CreateQuestion = () => {
       );
 
       if (res.status !== 200) {
-        throw new Error("An error occurred while creating the question.");
+        throw new Error();
       }
 
       const data = await res.json();

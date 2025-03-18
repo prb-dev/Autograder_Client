@@ -46,6 +46,7 @@ import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import ReactJson from "react-json-view";
+import { useToast } from "@/hooks/use-toast";
 
 export type Question = {
   _id: string;
@@ -55,104 +56,149 @@ export type Question = {
   created_at: Date;
 };
 
-export const columns: ColumnDef<Question>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "_id",
-    header: "_id",
-    cell: ({ row }) => <div>{row.getValue("_id")}</div>,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <div className="capitalize">{"Published"}</div>,
-  },
-  {
-    accessorKey: "diagram_type",
-    header: () => <div>Diagram Type</div>,
-    cell: ({ row }) => (
-      <Badge className="capitalize">{row.getValue("diagram_type")}</Badge>
-    ),
-  },
-  {
-    accessorKey: "answer_count",
-    header: () => <div>Answers</div>,
-    cell: ({ row }) => (
-      <div className="font-mono">{row.getValue("answer_count")}</div>
-    ),
-  },
-  {
-    accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created_at
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      );
+const getColumns = (fetchData: () => Promise<void>): ColumnDef<Question>[] => {
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-    cell: ({ row }) => (
-      <div className="font-medium font-mono">{row.getValue("created_at")}</div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(row.getValue("_id"))}
-            >
-              Copy question ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <Link to={`${row.getValue("_id")}`}>
-              <DropdownMenuItem>View question details</DropdownMenuItem>
-            </Link>
-            <Link to={`/view/${row.getValue("_id")}/a`}>
-              <DropdownMenuItem>View answers</DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Delete question</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+    {
+      accessorKey: "_id",
+      header: "_id",
+      cell: ({ row }) => <div>{row.getValue("_id")}</div>,
     },
-  },
-];
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: () => <div className="capitalize">{"Published"}</div>,
+    },
+    {
+      accessorKey: "diagram_type",
+      header: () => <div>Diagram Type</div>,
+      cell: ({ row }) => (
+        <Badge className="capitalize">{row.getValue("diagram_type")}</Badge>
+      ),
+    },
+    {
+      accessorKey: "answer_count",
+      header: () => <div>Answers</div>,
+      cell: ({ row }) => (
+        <div className="font-mono">{row.getValue("answer_count")}</div>
+      ),
+    },
+    {
+      accessorKey: "created_at",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Created_at
+            <CaretSortIcon className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="font-medium font-mono">
+          {row.getValue("created_at")}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const { toast } = useToast();
+        const handleDelete = async (id: string) => {
+          try {
+            const res = await fetch(
+              `${import.meta.env.VITE_BASE_API_URL}/questions/${id}`,
+              {
+                method: "DELETe",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+              }
+            );
+
+            if (res.status !== 200) {
+              throw new Error();
+            }
+
+            const data = await res.json();
+
+            await fetchData();
+
+            toast({
+              title: "Success",
+              description: data.message,
+            });
+          } catch (error) {
+            toast({
+              title: "Error",
+              description: "An error occurred while deleting the question.",
+            });
+            console.log(error);
+          }
+        };
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <DotsHorizontalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigator.clipboard.writeText(row.getValue("_id"))
+                }
+              >
+                Copy question ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <Link to={`${row.getValue("_id")}`}>
+                <DropdownMenuItem>View question details</DropdownMenuItem>
+              </Link>
+              <Link to={`/view/${row.getValue("_id")}/a`}>
+                <DropdownMenuItem>View answers</DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleDelete(row.getValue("_id"))}
+              >
+                Delete question
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+};
 
 const ViewQuestions = () => {
   const params = useParams();
@@ -164,6 +210,23 @@ const ViewQuestions = () => {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/questions`,
+        {
+          credentials: "include",
+        }
+      );
+      const values = await res.json();
+      setData(values.questions.reverse());
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const columns = getColumns(fetchData);
 
   const table = useReactTable({
     data,
@@ -185,21 +248,6 @@ const ViewQuestions = () => {
   });
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions`,
-          {
-            credentials: "include",
-          }
-        );
-        const values = await res.json();
-        setData(values.questions.reverse());
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchData();
   }, []);
 
