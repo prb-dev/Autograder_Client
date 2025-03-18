@@ -28,7 +28,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { EyeOpenIcon, ReloadIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import * as React from "react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -58,7 +57,10 @@ const ViewQuestion = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
         setQuestion(data.question.question);
@@ -93,9 +95,14 @@ const ViewQuestion = () => {
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(imageUrl),
           }
         );
+
+        if (res.status !== 200) {
+          throw new Error("An error occurred while submitting the answer.");
+        }
 
         const data = await res.json();
 
@@ -105,6 +112,10 @@ const ViewQuestion = () => {
         });
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting the answer.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);

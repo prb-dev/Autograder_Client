@@ -82,7 +82,7 @@ export default function CreateTechnicalQuestion() {
   */
   async function onSubmit(values: FormSchemaType) {
     try {
-      const response = await fetch("http://localhost:4000/api/exams", {
+      const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

@@ -51,7 +51,7 @@ export default function ViewStudentExamMarks() {
       }
 
       try {
-        const response = await fetch(`http://localhost:4000/api/submissions/${subId}`);
+        const response = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/submissions/${subId}`);
         if (!response.ok) throw new Error("Failed to fetch submission");
         const data = await response.json();
 

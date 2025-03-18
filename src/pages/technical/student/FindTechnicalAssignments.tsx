@@ -21,7 +21,7 @@ export default function FindTechnicalAssignments() {
   useEffect(() => {
     async function fetchExams() {
       try {
-        const res = await fetch("http://localhost:4000/api/exams");
+        const res = await fetch(`${import.meta.env.VITE_TECHNICAL_API_URL}/api/exams`);
         if (!res.ok) throw new Error("Failed to fetch exams");
         const allExams: TechnicalExam[] = await res.json();
         // filter only launched

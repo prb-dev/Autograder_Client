@@ -39,9 +39,11 @@ type TempCriterias = {
 const Rubric = ({
   question,
   toggler,
+  resetForm,
 }: {
   question: QuestionType;
   toggler: React.Dispatch<React.SetStateAction<boolean>>;
+  resetForm: () => void;
 }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -164,12 +166,17 @@ const Rubric = ({
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({
               url: imageUrl,
               diagram_type: diagramType,
             }),
           }
         );
+
+        if (res.status !== 200) {
+          throw new Error("An error occurred while creating the question.");
+        }
 
         const data = await res.json();
 
@@ -181,6 +188,10 @@ const Rubric = ({
         toggler(false);
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
     }
@@ -223,14 +234,25 @@ const Rubric = ({
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify(payload),
         }
       );
 
+      if (res.status !== 200) {
+        throw new Error("An error occurred while creating the question.");
+      }
+
       const data = await res.json();
 
       await uploadImage(data.qid, payload.diagram_type);
+
+      resetForm();
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);

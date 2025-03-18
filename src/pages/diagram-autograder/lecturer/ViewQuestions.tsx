@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import {
   CaretSortIcon,
   ChevronDownIcon,
@@ -33,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -47,6 +45,7 @@ import { TypographyH4 } from "@/components/ui/TypographyH4";
 import { TypographyInlineCode } from "@/components/ui/TypographyInlineCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import ReactJson from "react-json-view";
 
 export type Question = {
   _id: string;
@@ -144,8 +143,10 @@ export const columns: ColumnDef<Question>[] = [
               <DropdownMenuItem>View question details</DropdownMenuItem>
             </Link>
             <Link to={`/view/${row.getValue("_id")}/a`}>
-              <DropdownMenuItem>View answers </DropdownMenuItem>
+              <DropdownMenuItem>View answers</DropdownMenuItem>
             </Link>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Delete question</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -187,10 +188,13 @@ const ViewQuestions = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions`
+          `${import.meta.env.VITE_BASE_API_URL}/questions`,
+          {
+            credentials: "include",
+          }
         );
         const values = await res.json();
-        setData(values.questions);
+        setData(values.questions.reverse());
       } catch (error) {
         console.log(error);
       }
@@ -329,7 +333,10 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
     const fetchQuestion = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`,
+          {
+            credentials: "include",
+          }
         );
 
         const data = await response.json();
@@ -339,6 +346,7 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
           question: data.question.question,
           deadline: data.question.deadline,
           image: data.question.correct_answer.image,
+          textObject: data.question.correct_answer.text_representation,
           rubric: data.question.rubric,
           count: data.question.answer_count,
           type: data.question.diagram_type,
@@ -394,7 +402,7 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Rubric</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="account">
+            <Tabs defaultValue={question?.rubric.criterias[0].name}>
               <TabsList className="w-full">
                 {question?.rubric.criterias.map((criterion: any) => (
                   <TabsTrigger
@@ -445,13 +453,28 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Answer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative group">
-              <img
-                src={question?.image}
-                alt="Correct UML Diagram"
-                className="w-full max-h-[500px] rounded-lg border object-scale-down"
-              />
-            </div>
+            <Tabs defaultValue="image">
+              <TabsList className="w-full">
+                <TabsTrigger key="image" value="image" className="capitalize">
+                  Image
+                </TabsTrigger>
+                <TabsTrigger key="json" value="json" className="capitalize">
+                  Json
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="image">
+                <img
+                  src={question?.image}
+                  alt="Correct UML Diagram"
+                  className="w-full max-h-[500px] rounded-lg border object-scale-down"
+                />
+              </TabsContent>
+              <TabsContent value="json">
+                <div className="w-full max-h-[500px] overflow-auto">
+                  <ReactJson src={question?.textObject} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
