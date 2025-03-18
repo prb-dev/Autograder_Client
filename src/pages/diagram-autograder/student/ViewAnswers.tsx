@@ -54,7 +54,7 @@ const ViewAnswers = () => {
         <>
           <TypographyH2 className="m-5">Answers</TypographyH2>
           <div className="flex flex-col gap-5 p-5">
-            {answers.map((answer: any, i: number) => (
+            {answers.map((answer: any) => (
               <Card key={answer._id} className="">
                 <CardHeader>
                   <CardTitle className="self-end">
