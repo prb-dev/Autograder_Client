@@ -17,11 +17,13 @@ const ViewSingleAssignment = () => {
   const { register, handleSubmit, reset } = useForm();
   const [isLoading, setIsLoading] = useState(false);
 
+  const url = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchAssignment = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/api/assignments/singleForStudent/${assignmentId}`
+          `${url}/api/assignments/singleForStudent/${assignmentId}`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch assignment");

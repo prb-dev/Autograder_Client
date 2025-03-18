@@ -108,12 +108,12 @@ const ViewSubmissions = () => {
       rowSelection,
     },
   });
-
+  const url = import.meta.env.VITE_API_URL;
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/api/submissions/assignment/${assignmentId}`
+          `${url}/api/submissions/assignment/${assignmentId}`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch submissions");

@@ -16,7 +16,6 @@ import { TypographyH2 } from "../../../components/ui/TypographyH2";
 import { Input } from "../../../components/ui/input";
 import { CalendarIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-
 import clsx from "clsx";
 import {
   Popover,
@@ -28,6 +27,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
+// Define the schema with a refinement to ensure the rubric total is not more than 100
 const formSchema = z
   .object({
     title: z.string().nonempty({ message: "Title should not be empty." }),
@@ -36,14 +36,22 @@ const formSchema = z
       .string()
       .nonempty({ message: "Reference code should not be empty." }),
     deadline: z.date({ required_error: "A deadline is required." }),
-    rubric: z.array(
-      z.object({
-        criteria: z
-          .string()
-          .nonempty({ message: "Criteria should not be empty." }),
-        mark: z.number().min(1, { message: "Mark should be at least 1." }),
-      })
-    ),
+    rubric: z
+      .array(
+        z.object({
+          criteria: z
+            .string()
+            .nonempty({ message: "Criteria should not be empty." }),
+          mark: z.number().min(1, { message: "Mark should be at least 1." }),
+        })
+      )
+      .refine(
+        (rubrics) => rubrics.reduce((acc, curr) => acc + curr.mark, 0) <= 100,
+        {
+          message: "Total marks in rubric must not exceed 100.",
+          path: ["rubric"],
+        }
+      ),
   })
   .refine((data) => !!data.question.trim(), {
     message: "Question should not be empty.",
@@ -51,6 +59,8 @@ const formSchema = z
   });
 
 const CreateProgrammingQ = () => {
+  const url = import.meta.env.VITE_API_URL;
+
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -88,10 +98,11 @@ const CreateProgrammingQ = () => {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
+      // Convert rubric array to object with keys in lowercase underscore format
       const rubricObject = values.rubric.reduce((acc, item) => {
         acc[item.criteria.toLowerCase().replace(/\s+/g, "_")] = item.mark;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
 
       const requestBody = {
         title: values.title,
@@ -102,7 +113,7 @@ const CreateProgrammingQ = () => {
         deadline: values.deadline.toISOString(),
       };
 
-      const res = await fetch("http://localhost:5001/api/assignments/create", {
+      const res = await fetch(`${url}/api/assignments/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +140,7 @@ const CreateProgrammingQ = () => {
       } else {
         throw new Error("Failed to create assignment");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error!",

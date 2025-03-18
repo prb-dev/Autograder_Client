@@ -14,13 +14,11 @@ import { useNavigate } from "react-router-dom";
 const ViewStudentAssignments = () => {
   const [assignments, setAssignments] = useState([]);
   const navigate = useNavigate();
-
+  const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:5001/api/assignments/allForStudent"
-        );
+        const res = await fetch(`${url}/api/assignments/allForStudent`);
         if (!res.ok) {
           throw new Error("Failed to fetch assignments");
         }

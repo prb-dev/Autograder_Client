@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button";
 const ViewSubmissionDetails = () => {
   const { submissionId } = useParams();
   const [submission, setSubmission] = useState(null);
+  const url = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSubmission = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5001/api/submissions/${submissionId}`
-        );
+        const res = await fetch(`${url}/api/submissions/${submissionId}`);
         if (!res.ok) {
           throw new Error("Failed to fetch submission details");
         }

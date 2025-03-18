@@ -207,9 +207,11 @@ const ViewProAssignments = () => {
   });
 
   React.useEffect(() => {
+    console.log(import.meta.env.VITE_API_URL);
+    const url = import.meta.env.VITE_API_URL + "/api/assignments/getAll";
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/assignments/getAll");
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error("Failed to fetch data");
         }
