@@ -143,8 +143,10 @@ export const columns: ColumnDef<Question>[] = [
               <DropdownMenuItem>View question details</DropdownMenuItem>
             </Link>
             <Link to={`/view/${row.getValue("_id")}/a`}>
-              <DropdownMenuItem>View answers </DropdownMenuItem>
+              <DropdownMenuItem>View answers</DropdownMenuItem>
             </Link>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Delete question</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -186,7 +188,10 @@ const ViewQuestions = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions`
+          `${import.meta.env.VITE_BASE_API_URL}/questions`,
+          {
+            credentials: "include",
+          }
         );
         const values = await res.json();
         setData(values.questions.reverse());
@@ -328,7 +333,10 @@ const ViewQuestion = ({ params }: { params: Readonly<Params<string>> }) => {
     const fetchQuestion = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`,
+          {
+            credentials: "include",
+          }
         );
 
         const data = await response.json();

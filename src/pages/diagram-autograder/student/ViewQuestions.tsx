@@ -18,7 +18,10 @@ const ViewQuestions = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_API_URL}/questions`
+          `${import.meta.env.VITE_BASE_API_URL}/questions`,
+          {
+            credentials: "include",
+          }
         );
         const values = await res.json();
         setQuestions(values.questions.reverse());

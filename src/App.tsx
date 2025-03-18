@@ -12,6 +12,7 @@ import { Header } from "./components/ui/Header";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { DiagramSidebar } from "./components/diagram-autograder/lecturer/DiagramSidebar";
 import ViewQuestionsStudent from "./pages/diagram-autograder/student/ViewQuestions";
+import ViewAnswersStudent from "./pages/diagram-autograder/student/ViewAnswers";
 
 // 1) Import your new side menus:
 import SideMenuTechnicalLecturer from "./components/technical/lecturer/SideMenuTechnicalLecturer";
@@ -83,6 +84,10 @@ function App() {
                         element={<ViewQuestionsStudent />}
                       />
                       <Route path="/view/q/:qid?" element={<ViewQuestion />} />
+                      <Route
+                        path="/view/a/:aid?"
+                        element={<ViewAnswersStudent />}
+                      />
                     </>
                   )}
                 </Routes>
