@@ -1,3 +1,4 @@
+import React from "react";
 import {
   EnvelopeClosedIcon,
   EyeOpenIcon,
@@ -18,26 +19,27 @@ import {
 } from "@/components/ui/command";
 import { Link } from "react-router-dom";
 
-const SideMenu = () => {
+const SideMenuTechnicalLecturer = () => {
+  // NOTE: You can tweak these links/paths as needed:
   const menuList = [
     {
       group: {
         heading: "Questions",
         items: [
           {
-            link: "/create/q",
+            link: "/create/t",
             icon: <FilePlusIcon className="mr-2 h-4 w-4" />,
-            span: <span>Create</span>,
+            text: "Create",
           },
           {
-            link: "/view/q",
+            link: "/view/t",
             icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
-            span: <span>View</span>,
+            text: "View",
           },
           {
-            link: "/create/q",
+            link: "/launch/t",
             icon: <RocketIcon className="mr-2 h-4 w-4" />,
-            span: <span>Launch</span>,
+            text: "Launch",
           },
         ],
       },
@@ -47,13 +49,9 @@ const SideMenu = () => {
         heading: "Answers",
         items: [
           {
-            link: "/view/a",
+            link: "/view-answers/t",
             icon: <EyeOpenIcon className="mr-2 h-4 w-4" />,
-            span: (
-              <span>
-                View <span className="hidden">Answers</span>
-              </span>
-            ),
+            text: "View",
           },
         ],
       },
@@ -63,19 +61,19 @@ const SideMenu = () => {
         heading: "Settings",
         items: [
           {
-            link: "/create/q",
+            link: "/profile/t",
             icon: <PersonIcon className="mr-2 h-4 w-4" />,
-            span: <span>Profile</span>,
+            text: "Profile",
           },
           {
-            link: "/create/q",
+            link: "/mail/t",
             icon: <EnvelopeClosedIcon className="mr-2 h-4 w-4" />,
-            span: <span>Mail</span>,
+            text: "Mail",
           },
           {
-            link: "/create/q",
+            link: "/settings/t",
             icon: <GearIcon className="mr-2 h-4 w-4" />,
-            span: <span>Settings</span>,
+            text: "Settings",
           },
         ],
       },
@@ -89,20 +87,19 @@ const SideMenu = () => {
         <CommandList className="max-h-full">
           <CommandEmpty>No results found.</CommandEmpty>
 
-          {menuList.map(({ group }, i) => (
-            <div key={`m${i}`}>
+          {menuList.map(({ group }, idx) => (
+            <div key={`menu${idx}`}>
               <CommandGroup heading={group.heading}>
                 {group.items.map((item, i) => (
-                  <Link key={`l${i}`} to={item.link}>
+                  <Link key={i} to={item.link}>
                     <CommandItem>
                       {item.icon}
-                      {item.span}
+                      {item.text}
                     </CommandItem>
                   </Link>
                 ))}
               </CommandGroup>
-
-              {i !== menuList.length - 1 && <CommandSeparator />}
+              {idx !== menuList.length - 1 && <CommandSeparator />}
             </div>
           ))}
         </CommandList>
@@ -111,4 +108,4 @@ const SideMenu = () => {
   );
 };
 
-export default SideMenu;
+export default SideMenuTechnicalLecturer;

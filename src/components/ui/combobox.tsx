@@ -15,20 +15,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Combobox({
   title,
   placeholder,
   emptyMessage,
   values,
-  handleChange,
 }: {
   title: string;
   placeholder: string;
   emptyMessage: string;
   values: string[];
-  handleChange: (selectedValue: string) => void;
 }) {
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -63,9 +63,14 @@ export function Combobox({
                   key={framework.value}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    if (currentValue === value) {
+                      setValue("");
+                      navigate("/view/a");
+                    } else {
+                      setValue(currentValue);
+                      navigate(`/view/${currentValue}/a`);
+                    }
                     setOpen(false);
-                    handleChange(currentValue === value ? "" : currentValue);
                   }}
                 >
                   {framework.label}

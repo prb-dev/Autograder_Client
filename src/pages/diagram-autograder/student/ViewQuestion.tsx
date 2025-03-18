@@ -28,8 +28,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { EyeOpenIcon, ReloadIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import * as React from "react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 import * as z from "zod";
 
 const formSchema = z.object({
@@ -38,6 +40,7 @@ const formSchema = z.object({
 
 const ViewQuestion = () => {
   const { toast } = useToast();
+  const params = useParams();
 
   const [question, setQuestion] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -55,7 +58,7 @@ const ViewQuestion = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/questions/66e8e84cdd16f4ca22cd3c26"
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${params.qid}`
         );
         const data = await res.json();
         setQuestion(data.question.question);
@@ -69,7 +72,7 @@ const ViewQuestion = () => {
   }, []);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const qid = "66e8e84cdd16f4ca22cd3c26";
+    const qid = params.qid;
     const uid = "66e8e84cdd16f4ca22cd3c26";
     const imageRef = ref(
       storage,
@@ -84,7 +87,7 @@ const ViewQuestion = () => {
         const imageUrl = await getDownloadURL(snapshot.ref);
 
         const res = await fetch(
-          `http://127.0.0.1:8000/answers/submit/${qid}/${uid}`,
+          `${import.meta.env.VITE_BASE_API_URL}/answers/submit/${qid}/${uid}`,
           {
             method: "POST",
             headers: {
@@ -94,6 +97,10 @@ const ViewQuestion = () => {
           }
         );
 
+        if (res.status !== 200) {
+          throw new Error("An error occurred while submitting the answer.");
+        }
+
         const data = await res.json();
 
         toast({
@@ -102,6 +109,10 @@ const ViewQuestion = () => {
         });
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting the answer.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);
@@ -109,7 +120,7 @@ const ViewQuestion = () => {
   };
 
   return (
-    <div className={clsx("h-[100vh] overflow-y-scroll p-5 space-y-5")}>
+    <div className={clsx("h-[100vh] p-5 space-y-5")}>
       <div className="flex items-center justify-between">
         <TypographyH2>Answer the Question</TypographyH2>
         <div className="flex flex-col items-center">

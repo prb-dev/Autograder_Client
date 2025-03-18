@@ -39,9 +39,11 @@ type TempCriterias = {
 const Rubric = ({
   question,
   toggler,
+  resetForm,
 }: {
   question: QuestionType;
   toggler: React.Dispatch<React.SetStateAction<boolean>>;
+  resetForm: () => void;
 }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +160,7 @@ const Rubric = ({
         const imageUrl = await getDownloadURL(snapshot.ref);
 
         const res = await fetch(
-          `http://127.0.0.1:8000/questions/${qid}/add/image`,
+          `${import.meta.env.VITE_BASE_API_URL}/questions/${qid}/add/image`,
           {
             method: "POST",
             headers: {
@@ -171,6 +173,10 @@ const Rubric = ({
           }
         );
 
+        if (res.status !== 200) {
+          throw new Error("An error occurred while creating the question.");
+        }
+
         const data = await res.json();
 
         toast({
@@ -181,6 +187,10 @@ const Rubric = ({
         toggler(false);
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
     }
@@ -216,18 +226,31 @@ const Rubric = ({
 
     try {
       setIsLoading(true);
-      const res = await fetch(`http://127.0.0.1:8000/questions/save`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/questions/save`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (res.status !== 200) {
+        throw new Error("An error occurred while creating the question.");
+      }
 
       const data = await res.json();
 
       await uploadImage(data.qid, payload.diagram_type);
+
+      resetForm();
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the question.",
+      });
       console.log(error);
     } finally {
       setIsLoading(false);
