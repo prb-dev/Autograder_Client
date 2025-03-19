@@ -175,6 +175,14 @@ const Rubric = ({
         );
 
         if (res.status !== 200) {
+          if (res.status === 503) {
+            toast({
+              title: "Info",
+              description: "Taking longer than expected.",
+            });
+            return;
+          }
+
           throw new Error("An error occurred while creating the question.");
         }
 
