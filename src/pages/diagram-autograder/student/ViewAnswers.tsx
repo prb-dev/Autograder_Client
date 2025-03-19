@@ -118,7 +118,6 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
   }, []);
 
   React.useEffect(() => {
-    console.log(answers.find((ans: any) => ans._id === params.aid));
     setAnswer(answers.find((ans: any) => ans._id === params.aid));
   }, [answers]);
 
