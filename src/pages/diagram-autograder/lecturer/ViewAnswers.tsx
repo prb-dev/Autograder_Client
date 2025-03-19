@@ -377,6 +377,7 @@ const ViewAnswers = () => {
 
 const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
   const [answer, setAnswer] = useState<any>();
+  const [showRubric, setShowRubric] = useState(false);
 
   useEffect(() => {
     const fetchAnswer = async () => {
@@ -401,6 +402,7 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
           id: data1.answer._id,
           uid: data1.answer.user_id,
           marks: data1.answer.marks,
+          rubric: data2.question.rubric,
           diagram: data1.answer.answer.image,
           textObject: data1.answer.answer.text_representation,
           correct_diagram: data2.question.correct_answer.image,
@@ -453,6 +455,60 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
             <CardTitle className="text-xl">Marks for each criterion</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="flex justify-end mb-5">
+              <Button onClick={() => setShowRubric(!showRubric)}>
+                {showRubric ? "Hide Rubric" : "Show Rubric"}
+              </Button>
+            </div>
+            {showRubric && (
+              <Tabs
+                defaultValue={answer?.rubric.criterias[0].name}
+                className="mb-5"
+              >
+                <TabsList className="w-full">
+                  {answer?.rubric.criterias.map((criterion: any) => (
+                    <TabsTrigger
+                      key={criterion.name}
+                      value={criterion.name}
+                      className="capitalize"
+                    >
+                      {criterion.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {answer?.rubric.criterias.map((criterion: any) => (
+                  <TabsContent key={criterion.name} value={criterion.name}>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-center w-1/2">
+                            Correctness
+                          </TableHead>
+                          <TableHead className="text-center">Marks</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="text-center">
+                        {criterion.marks_ranges.map((range: any, i: number) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {`${range.range[0]} - ${range.range[1]} %`}
+                            </TableCell>
+                            <TableCell>{range.marks}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                      <TableFooter className="text-center">
+                        <TableRow>
+                          <TableCell>SubTotal</TableCell>
+                          <TableCell>{criterion.sub_total}</TableCell>
+                        </TableRow>
+                      </TableFooter>
+                    </Table>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            )}
+
             <Table>
               <TableHeader>
                 <TableRow>
