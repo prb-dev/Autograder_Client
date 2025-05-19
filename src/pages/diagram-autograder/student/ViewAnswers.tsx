@@ -54,7 +54,7 @@ const ViewAnswers = () => {
         <>
           <TypographyH2 className="m-5">Answers</TypographyH2>
           <div className="flex flex-col gap-5 p-5">
-            {answers.map((answer: any, i: number) => (
+            {answers.map((answer: any) => (
               <Card key={answer._id} className="">
                 <CardHeader>
                   <CardTitle className="self-end">
@@ -118,7 +118,6 @@ const AnswerDetails = ({ params }: { params: Readonly<Params<string>> }) => {
   }, []);
 
   React.useEffect(() => {
-    console.log(answers.find((ans: any) => ans._id === params.aid));
     setAnswer(answers.find((ans: any) => ans._id === params.aid));
   }, [answers]);
 
