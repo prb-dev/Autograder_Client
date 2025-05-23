@@ -67,7 +67,16 @@ const CreateProgrammingQ = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [created, setCreated] = useState(false);
-  const [question, setQuestion] = useState({
+  type RubricItem = { criteria: string; mark: number };
+  type QuestionState = {
+    title: string;
+    question: string;
+    reference: string;
+    deadline: string;
+    rubric: RubricItem[];
+  };
+
+  const [question, setQuestion] = useState<QuestionState>({
     title: "",
     question: "",
     reference: "",

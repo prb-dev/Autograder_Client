@@ -91,12 +91,13 @@ const CreateQuestion = () => {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify(values.question),
         }
       );
 
       if (res.status !== 200) {
-        throw new Error("An error occurred while creating the question.");
+        throw new Error();
       }
 
       const data = await res.json();
