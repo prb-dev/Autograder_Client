@@ -218,99 +218,62 @@ const EnglishAutograder: React.FC = () => {
     }
   };
 
-  const connectWebSocket = useCallback(() => {
-    const rws = new ReconnectingWebSocket('ws://localhost:8000/grade');
-
-    rws.addEventListener('open', () => {
-      console.log('WebSocket connection opened');
-      // Normalize weights before sending
-      const { grammar_weight, vocabulary_weight, creativity_weight } = gradingParams;
-      let normalizedParams;
-      if (vocabulary_weight === 0 && creativity_weight === 0) {
-        normalizedParams = { ...gradingParams, grammar_weight: 1, vocabulary_weight: 0, creativity_weight: 0 };
-      } else {
-        const sum = grammar_weight + vocabulary_weight + creativity_weight;
-        normalizedParams = {
-          ...gradingParams,
-          grammar_weight: parseFloat((grammar_weight / sum).toFixed(2)),
-          vocabulary_weight: parseFloat((vocabulary_weight / sum).toFixed(2)),
-          creativity_weight: parseFloat((creativity_weight / sum).toFixed(2)),
-        };
-      }
-      rws.send(JSON.stringify({
-        essay: essay,
-        essay_type: essayType,
-        grading_params: normalizedParams
-      }));
-    });
-
-    rws.addEventListener('message', (event: MessageEvent) => {
-      try {
-        const data: ServerMessage = JSON.parse(event.data);
-        console.log('Received message:', data);
-
-        if (data.type === 'progress') {
-          const { sentence_index, total_sentences, corrected, original, detailed_errors } = data;
-          setCorrectedSentences(prev => {
-            const newCorrected = [...prev];
-            newCorrected[sentence_index - 1] = corrected || original || ''; // Adjust for 1-based index
-            return newCorrected;
-          });
-          setProgress((sentence_index / total_sentences) * 100);
-          setCurrentSentenceIndex(sentence_index - 1);
-        } else if (data.type === 'result') {
-          setResult(data.data);
-          setIsGrading(false);
-        } else if (data.type === 'error') {
-          setErrorMessage(data.message);
-          setIsGrading(false);
-        }
-      } catch (err) {
-        console.error('Error parsing message:', err);
-        setErrorMessage('Failed to parse server message.');
-        setIsGrading(false);
-      }
-    });
-
-    rws.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error);
-      setErrorMessage('WebSocket encountered an error.');
-      setIsGrading(false);
-    });
-
-    rws.addEventListener('close', (event) => {
-      console.log('WebSocket connection closed:', event);
-      setIsGrading(false);
-      const closeEvent = event as CloseEvent;
-      if (!closeEvent.wasClean) {
-        setErrorMessage('WebSocket connection closed unexpectedly.');
-      }
-    });
-
-    wsRef.current = rws;
-  }, [essay, essayType, gradingParams]);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsGrading(true);
+    setErrorMessage(null);
     setResult(null);
     setProgress(0);
-    setErrorMessage(null);
 
-    const sentences = essay.match(/[^\.!\?]+[\.!\?]+/g) || [];
-    setOriginalSentences(sentences);
-    setCorrectedSentences(new Array(sentences.length).fill(''));
+    const ws = new WebSocket('ws://localhost:8000/grade');
 
-    connectWebSocket();
-  };
+    ws.onopen = () => {
+      console.log('WebSocket Connected');
+      ws.send(JSON.stringify({
+        essay,
+        essay_type: essayType,
+        grading_params: {
+          grammar_weight: enableGrammar ? gradingParams.grammar_weight : 0,
+          vocabulary_weight: enableVocabulary ? gradingParams.vocabulary_weight : 0,
+          creativity_weight: enableCreativity ? gradingParams.creativity_weight : 0,
+          min_word_count: gradingParams.min_word_count,
+          max_word_count: gradingParams.max_word_count,
+        }
+      }));
+    };
 
-  useEffect(() => {
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Received:', data);
+
+      if (data.type === 'progress') {
+        const { sentence_index, total_sentences } = data;
+        setProgress((sentence_index / total_sentences) * 100);
+        setCorrectedSentences(prev => {
+          const newCorrected = [...prev];
+          newCorrected[sentence_index - 1] = data.corrected;
+          return newCorrected;
+        });
+      } else if (data.type === 'result') {
+        setResult(data.data);
+        setIsGrading(false);
+      } else if (data.type === 'error') {
+        setErrorMessage(data.message);
+        setIsGrading(false);
       }
     };
-  }, []);
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setErrorMessage('Connection error');
+      setIsGrading(false);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket closed');
+      setIsGrading(false);
+    };
+  };
 
   const downloadReport = () => {
     if (result) {
