@@ -28,6 +28,14 @@ import FindTechnicalAssignments from "./pages/technical/student/FindTechnicalAss
 import StartTechnicalExam from "./pages/technical/student/StartTechnicalExam";
 import StudentMarksList from "./pages/technical/student/StudentMarksList";
 import ViewStudentExamMarks from "./pages/technical/student/ViewStudentExamMarks";
+import SideMenuPro from "./components/diagram-autograder/lecturer/SideMenuPro";
+import SideMenuStu from "./components/programming-autograder/student/SideMenuStu";
+import CreateProgrammingQ from "./pages/program-auotgrader/lecturer/CreateProgrammingQ";
+import ViewProAssignments from "./pages/program-auotgrader/lecturer/ViewProAssignments";
+import ViewSubmissions from "./pages/program-auotgrader/lecturer/ViewSubmissions";
+import ViewSubmissionDetails from "./pages/program-auotgrader/lecturer/ViewSubmissionDetails";
+import ViewStudentAssignments from "./pages/program-auotgrader/Student/ViewStudentAssignments";
+import ViewSingleAssignment from "./pages/program-auotgrader/Student/ViewSingleAssignment";
 
 function App() {
   const [lecturer, setLecturer] = useState<boolean>(
@@ -170,13 +178,68 @@ function App() {
           </main>
           <Toaster />
         </>
-      ) :
-    
-       autograder === "e" ? (
+      ) : autograder == "p" ? (
+        <>
+          <main className="flex">
+            {lecturer ? <SideMenuPro /> : <SideMenuStu />}
+
+            <div className="flex-1">
+              <div className="flex justify-end items-center p-5">
+                <Header toggler={setAutograder} />
+                <div className="flex gap-2 items-center scale-90">
+                  <Switch
+                    id="user-type"
+                    checked={lecturer}
+                    onClick={() => setLecturer(!lecturer)}
+                  />
+                  <Label htmlFor="user-type"> Lecturer </Label>
+                </div>
+              </div>
+              <Routes>
+                {lecturer ? (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route
+                      path="/procreate/q"
+                      element={<CreateProgrammingQ />}
+                    />
+                    <Route
+                      path="/pro/View/q"
+                      element={<ViewProAssignments />}
+                    />
+                    <Route
+                      path="/submissions/:assignmentId"
+                      element={<ViewSubmissions />}
+                    />
+                    <Route
+                      path="/submissions/details/:submissionId"
+                      element={<ViewSubmissionDetails />}
+                    />
+                    {/* <Route path="/view/a" element={<ViewAnswers />} /> */}
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<Home />} />
+                    <Route
+                      path="/findAssignment"
+                      element={<ViewStudentAssignments />}
+                    />
+                    <Route
+                      path="stu/assignment/:assignmentId"
+                      element={<ViewSingleAssignment />}
+                    />
+                  </>
+                )}
+              </Routes>
+            </div>
+          </main>
+          <Toaster />
+        </>
+      ) : autograder === "e" ? (
         <>
           <main className="flex">
             {/* 2) Conditionally show side menu for lecturer or student */}
-           
+
             <div className="h-[100vh] flex-1">
               <div className="flex justify-end items-center p-5">
                 <Header toggler={setAutograder} />
@@ -190,14 +253,12 @@ function App() {
                 </div>
               </div>
 
-             
-              < EnglishAutograder />
+              <EnglishAutograder />
             </div>
           </main>
           <Toaster />
         </>
-      ) :
-      (
+      ) : (
         // If you want a fallback for other autograders or none selected
         <>
           <div className="flex justify-end items-center p-5 pt-0">
