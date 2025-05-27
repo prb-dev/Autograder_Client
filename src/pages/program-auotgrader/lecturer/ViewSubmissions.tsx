@@ -33,52 +33,6 @@ export type Submission = {
   assignment_id: string;
 };
 
-export const columns: ColumnDef<Submission>[] = [
-  {
-    accessorKey: "_id",
-    header: "Submission ID",
-    cell: ({ row }) => <div>{row.getValue("_id")}</div>,
-  },
-  {
-    accessorKey: "student_id",
-    header: "Student ID",
-    cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
-  },
-  {
-    accessorKey: "total_score",
-    header: "Total Marks",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("total_score")}</div>
-    ),
-  },
-  {
-    accessorKey: "submitted_at",
-    header: "Submitted At",
-    cell: ({ row }) => (
-      <div className="font-mono">
-        {new Date(row.getValue("submitted_at")).toLocaleString()}
-      </div>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const navigate = useNavigate();
-      return (
-        <Button
-          variant="outline"
-          onClick={() =>
-            navigate(`/submissions/details/${row.getValue("_id")}`)
-          }
-        >
-          View Details
-        </Button>
-      );
-    },
-  },
-];
-
 const ViewSubmissions = () => {
   const { assignmentId } = useParams();
   const [data, setData] = React.useState<Submission[]>([]);
@@ -89,6 +43,80 @@ const ViewSubmissions = () => {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const navigate = useNavigate();
+  const url = import.meta.env.VITE_API_PRO_URL || "http://localhost:5001";
+
+  const handleDelete = async (id: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this submission?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${url}/api/submissions/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete submission");
+
+      setData((prev) => prev.filter((submission) => submission._id !== id));
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete submission.");
+    }
+  };
+
+  const columns: ColumnDef<Submission>[] = [
+    {
+      accessorKey: "_id",
+      header: "Submission ID",
+      cell: ({ row }) => <div>{row.getValue("_id")}</div>,
+    },
+    {
+      accessorKey: "student_id",
+      header: "Student ID",
+      cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+    },
+    {
+      accessorKey: "total_score",
+      header: "Total Marks",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("total_score")}</div>
+      ),
+    },
+    {
+      accessorKey: "submitted_at",
+      header: "Submitted At",
+      cell: ({ row }) => (
+        <div className="font-mono">
+          {new Date(row.getValue("submitted_at")).toLocaleString()}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const id = row.getValue("_id");
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/submissions/details/${String(id)}`)}
+            >
+              View
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete(String(id))}
+            >
+              Delete
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
     data,
@@ -108,7 +136,7 @@ const ViewSubmissions = () => {
       rowSelection,
     },
   });
-  const url = import.meta.env.VITE_API_PRO_URL;
+
   React.useEffect(() => {
     const fetchData = async () => {
       try {
@@ -132,7 +160,7 @@ const ViewSubmissions = () => {
     };
 
     fetchData();
-  }, [assignmentId]);
+  }, [assignmentId, url]);
 
   return (
     <div className="w-full p-5">

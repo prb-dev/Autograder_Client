@@ -27,7 +27,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the schema with a refinement to ensure the rubric total is not more than 100
+// Define the schema with a refinement to ensure the total rubric marks equal 100
 const formSchema = z
   .object({
     title: z.string().nonempty({ message: "Title should not be empty." }),
@@ -42,13 +42,16 @@ const formSchema = z
           criteria: z
             .string()
             .nonempty({ message: "Criteria should not be empty." }),
-          mark: z.number().min(1, { message: "Mark should be at least 1." }),
+          mark: z.preprocess(
+            (val) => (typeof val === "string" ? Number(val) : val),
+            z.number().min(1, { message: "Mark should be at least 1." })
+          ),
         })
       )
       .refine(
-        (rubrics) => rubrics.reduce((acc, curr) => acc + curr.mark, 0) <= 100,
+        (rubrics) => rubrics.reduce((acc, curr) => acc + curr.mark, 0) === 100,
         {
-          message: "Total marks in rubric must not exceed 100.",
+          message: "Total marks should equal 100.",
           path: ["rubric"],
         }
       ),
@@ -60,12 +63,20 @@ const formSchema = z
 
 const CreateProgrammingQ = () => {
   const url = import.meta.env.VITE_API_PRO_URL;
-
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [created, setCreated] = useState(false);
-  const [question, setQuestion] = useState({
+  type RubricItem = { criteria: string; mark: number };
+  type QuestionState = {
+    title: string;
+    question: string;
+    reference: string;
+    deadline: string;
+    rubric: RubricItem[];
+  };
+
+  const [question, setQuestion] = useState<QuestionState>({
     title: "",
     question: "",
     reference: "",
@@ -80,6 +91,7 @@ const CreateProgrammingQ = () => {
       question: "",
       reference: "",
       deadline: undefined,
+      // Default rubric values sum to 100
       rubric: [
         { criteria: "Syntax Correctness", mark: 20 },
         { criteria: "Output Match", mark: 30 },
@@ -98,11 +110,14 @@ const CreateProgrammingQ = () => {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      // Convert rubric array to object with keys in lowercase underscore format
+      // Convert rubric array to an object with keys in lowercase underscore format
       const rubricObject = values.rubric.reduce((acc, item) => {
-        acc[item.criteria.toLowerCase().replace(/\s+/g, "_")] = item.mark;
+        const key = item.criteria.toLowerCase().replace(/\s+/g, "_");
+        acc[key] = item.mark;
         return acc;
       }, {} as Record<string, number>);
+
+      console.log("Formatted Rubric:", rubricObject);
 
       const requestBody = {
         title: values.title,
@@ -270,6 +285,7 @@ const CreateProgrammingQ = () => {
                         <FormControl>
                           <Input {...field} placeholder="Criteria" />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -278,9 +294,19 @@ const CreateProgrammingQ = () => {
                     name={`rubric.${index}.mark`}
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Mark</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} placeholder="Mark" />
+                          <Input
+                            type="number"
+                            {...field}
+                            placeholder="Mark"
+                            value={field.value}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
+                          />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -316,6 +342,7 @@ const CreateProgrammingQ = () => {
           </form>
         </Form>
       </div>
+
       <div
         className={clsx(
           "h-full overflow-y-scroll flex p-5",
